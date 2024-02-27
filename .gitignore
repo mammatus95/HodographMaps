@@ -2,10 +2,6 @@
 
 .ipynb_checkpoints/
 */.ipynb_checkpoints/
-*/*/.ipynb_checkpoints/
-
-*/*.csv
-*/*/*.csv
 
 */*.png
 */*/*.png
@@ -13,11 +9,12 @@
 */*.svg
 */*/*.svg
 
-*/*.jpg
-*/*/*.jpg
-
 *.log
 */*.log
+
+*.pyc
+*/*.pyc
+*/*/*.pyc
 
 src/invariant
 src/iconnest

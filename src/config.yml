@@ -1,0 +1,12 @@
+run: 0
+fp: 9
+default_date: "2024-02-27"
+
+levels: [60,10]
+steps: 1  # level steps
+
+threshold: 0
+
+fontsize: 12
+titlesize: 18
+

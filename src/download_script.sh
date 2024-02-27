@@ -63,7 +63,7 @@ do
   cd ${path_icon}
   T=$(printf "%03d" "$X")
   #single level
-  for N in CAPE_ML 
+  for N in CAPE_ML #CAPE_CON
   do
     typeset -l nvar
     nvar=${N}
@@ -83,7 +83,7 @@ do
   done
 
   #rm -f 
-
+  python3 main.py Basic --fp ${X} --run ${R} --date $(date)
 
   echo "done with ${T}"
 done

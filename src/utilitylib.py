@@ -37,13 +37,13 @@ def load_yaml(yaml_file, yaml_path='./'):
     -----------
     yaml_file : name of yaml file
     """
-    with open(f"{yaml_path}/{yaml_file}",' r') as yhand:
+    with open(f"{yaml_path}/{yaml_file}", 'r') as yhand:
         config_data = yaml.safe_load(yhand)
     return config_data
 
 # ---------------------------------------------------------------------------------------------------------------------
 # https://opendata.dwd.de/weather/nwp/icon-eu/grib/00/cape_ml/icon-eu_europe_regular-lat-lon_single-level_2024022700_006_CAPE_ML.grib2.bz2
-
+# https://opendata.dwd.de/weather/nwp/icon-eu/grib/00/u/icon-eu_europe_regular-lat-lon_model-level_2024022700_000_10_U.grib2.bz2
 
 def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
 
@@ -60,9 +60,12 @@ def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-def open_gribfile(fieldname, path="./iconnest/"):
+def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./iconnest/"):
+    date_string = datetime_obj.strftime("%Y%m%d")
+    nwp_singlelevel = "icon-eu_europe_regular-lat-lon_single-level"
+
     # Open the GRIB file
-    grbs = pygrib.open(f"{path}icon-eu_europe_regular-lat-lon_single-level_2024022700_009_{fieldname.upper()}.grib2")
+    grbs = pygrib.open(f"{path}{nwp_singlelevel}_{date_string}{run:02d}_{fp:03d}_{fieldname.upper()}.grib2")
 
     # Read specific data from the file
     first_message = grbs[1]
@@ -74,9 +77,31 @@ def open_gribfile(fieldname, path="./iconnest/"):
     lats, lons = first_message.latlons()
     grbs.close()
 
-    print("Data shape:", data.shape)
+    # print("Data shape:", data.shape)
     print("Maximum:", np.nanmax(data))
     return data, lats, lons
+
+def open_gribfile_multi(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/"):
+    date_string = datetime_obj.strftime("%Y%m%d")
+    nwp_modellevel = "icon-eu_europe_regular-lat-lon_model-level"
+
+    # Open the GRIB file
+    grbs = pygrib.open(f"{path}{nwp_modellevel}_{date_string}{run:02d}_{fp:03d}_{lvl}_{fieldname.upper()}.grib2")
+
+    # Read specific data from the file
+    first_message = grbs[1]
+
+    data = first_message.values
+    # Convert missing values to NaNs
+    data[data == first_message.missingValue] = np.nan
+
+    lats, lons = first_message.latlons()
+    grbs.close()
+
+    # print("Data shape:", data.shape)
+    print("Maximum:", np.nanmax(data))
+    return data
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 
