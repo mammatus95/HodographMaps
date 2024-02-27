@@ -1,0 +1,419 @@
+#!/usr/bin/python3
+
+#this modul include all function to plot ICON Nest charts for eu and ce
+
+import numpy as np
+
+#matplotlib
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+from matplotlib.cm import get_cmap
+from matplotlib.colors import BoundaryNorm
+from matplotlib.ticker import MaxNLocator
+
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+#cartopy
+import cartopy.crs as crs
+import cartopy.feature as cfeature
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+states_provinces = cfeature.NaturalEarthFeature(
+    category='cultural', name='admin_0_boundary_lines_land', scale='10m', facecolor='none')
+
+import os
+import sys
+import datetime
+from copy import deepcopy
+
+# own moduls
+import utilitylib as ut
+import kinematiclib as kin
+# ---------------------------------------------------------------------------------------------------------------------
+# create plot class
+# =====================================================================================================================
+# https://scitools.org.uk/cartopy/docs/v0.16/crs/projections.html#cartopy-projections
+
+
+def eu_merc(hour, start, projection=crs.Mercator(), factor=3):
+    fig, ax = plt.subplots(figsize=(3*factor, 3.5091*factor), subplot_kw=dict(projection=projection))
+    ax.set_extent([-10.5, 28.0, 30.5, 67.5])
+    # ax.stock_img()
+    ax.coastlines('50m', linewidth=1.2)
+    gl = ax.gridlines(draw_labels=True)
+    gl.xlabels_top = False
+    gl.ylabels_right = False
+    gl.xformatter = LONGITUDE_FORMATTER
+    gl.yformatter = LATITUDE_FORMATTER
+    string1, string2 = ut.datum(hour, start)
+    plt.annotate(string1, xy=(0.8, 1), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=10)
+    return fig, ax
+
+
+def eu_states(hour, start, projection=crs.EuroPP()):
+    fig, ax = plt.subplots(figsize=(9, 7), subplot_kw=dict(projection=projection))
+    plt.subplots_adjust(left=0.05, right=0.97, bottom=0.05, top=0.95)
+    ax.set_extent([-9.5, 33.0, 38.5, 58.5])
+    ax.coastlines('50m', linewidth=1.2)
+    ax.add_feature(states_provinces, edgecolor='black')
+    string1, string2 = ut.datum(hour, start)
+    plt.annotate("ICON Nest (DWD)", xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string1, xy=(0.8, 1), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=10)
+    return fig, ax
+
+def ce_states(hour, start, projection=crs.EuroPP(), lon1=1.56, lon2=18.5, lat1=45.1, lat2=56.6):
+    fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
+    plt.subplots_adjust(left=0.05, right=0.99, bottom=0.05, top=0.95)
+    ax.set_extent([lon1, lon2, lat1, lat2])
+    ax.coastlines('10m', linewidth=1.2)
+    ax.add_feature(states_provinces, edgecolor='black')
+    string1, string2 = ut.datum(hour, start)
+    plt.annotate("ICON Nest (DWD)", xy=(0.02, -0.04), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string1, xy=(0.835, 1), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=10)
+    return fig, ax
+    
+def east_de(hour, start, projection=crs.EuroPP(), lon1=10.7, lon2=18, lat1=49.8, lat2=54.8):
+    # 10.77, 18.92, 49.80, 55.06
+    fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
+    plt.subplots_adjust(left=0.05, right=0.99, bottom=0.1, top=0.95)
+    ax.set_extent([lon1, lon2, lat1, lat2])
+    ax.coastlines('10m', linewidth=1.2)
+    ax.add_feature(states_provinces, edgecolor='black')
+    string1, string2 = ut.datum(hour, start)
+    plt.annotate("ICON Nest (DWD)", xy=(0.02, -0.04), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string1, xy=(0.835, 1), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=10)
+    return fig, ax
+
+def alps(hour, start, projection=crs.EuroPP(), lon1=5.8, lon2=17.8, lat1=45.23, lat2=49.5):
+    fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
+    ax.set_extent([lon1, lon2, lat1, lat2])
+    ax.coastlines('10m', linewidth=1.2)
+    ax.add_feature(states_provinces, edgecolor='black')
+    string1, string2 = ut.datum(hour, start)
+    plt.annotate("ICON Nest (DWD)", xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string1, xy=(0.8, 1), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=10)
+    return fig, ax
+
+def two_plots(projection=crs.EuroPP(), lon1=3.56, lon2=16.5, lat1=46.2, lat2=55.6, fac=3):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(5*fac, 3*fac), subplot_kw=dict(projection=projection))
+    fig.subplots_adjust(left=0.02, right=0.92, top=0.95, bottom=0.05, wspace=0.14)
+    ax1.set_extent([lon1, lon2, lat1, lat2])
+    ax1.coastlines('10m', linewidth=1.2)
+    ax1.add_feature(states_provinces, edgecolor='black')
+    ax2.set_extent([lon1, lon2, lat1, lat2])
+    ax2.coastlines('10m', linewidth=1.2)
+    ax2.add_feature(states_provinces, edgecolor='black')
+    plt.annotate("ICON Nest (DWD)", xy=(0.6, -0.03), xycoords='axes fraction', fontsize=10)
+    return fig, ax1, ax2
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+def test_plot (cape_fld, lats, lons, hour, run, titel='CAPE'):
+    """
+    Parameters:
+    ------------
+    cape_fld   : CAPE field
+    lat        :
+    lon        :
+    hour       :
+    run      :
+
+    Returns:
+    --------
+    None
+    """
+    
+    # create colormap for CAPE field
+    clevs = np.array([1, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000])
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
+
+    fig, ax = ce_states(hour, run, projection=crs.PlateCarree())
+    plt.title(titel, fontsize=15)
+
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap, extend = 'max', alpha=0.4, antialiased=True)
+    
+    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    fig.colorbar(wx, cax=cax, orientation='horizontal')
+
+    name = f"test_ce_{hour}.png"
+    plt.savefig(name)
+    plt.close()
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+def hodopoint(point, u, v, ax, width=0.1, clim=40, projection='polar'):
+    """
+    Parameters:
+    ------------
+    width      : width of added axes for the hodo as fig coordinates (examples: 0.5 are half of the image)
+    clim       : max. wind speed magnitude of the hodo
+    point      : tuple of data coordinates (10, 55)
+    u, v       : wind components
+    projection : 'polar'
+
+    Returns:
+    --------
+    None
+    """
+    #print(point)
+    #proj_cart = crs.PlateCarree()
+    #point=(0.5, 0.5)
+    # convert from Axes coordinates to display coordinates
+    #p_a_disp = ax.transAxes.transform(point)
+
+    # convert from display coordinates to data coordinates
+    #p_a_data = ax.transData.inverted().transform(p_a_disp)
+    
+    #this takes us from the data coordinates to the display coordinates.
+    test = ax.transData.transform(point)
+    #print(test)
+    #this should take us from the display coordinates to the axes coordinates.
+    trans = ax.transAxes.inverted().transform(test)
+    #print(p_a_data)
+    # convert from data to cartesian coordinates
+    #trans = proj_cart.transform_point(src_crs=proj, x=point[0], y=point[1])
+    #print(trans)
+    #trans=(0.5, 0.5)
+    #create new axe
+    ax2 = plt.axes([trans[0]-width/2, trans[1]-width/2, width, width], projection=projection)
+
+    ax2.get_xaxis().set_visible(False)
+    ax2.get_yaxis().set_visible(False)
+    #ax2.patch.set_visible(False)
+    ax2.set_frame_on(False)
+    #ax2.set_xlim(-clim, clim)
+    ax2.set_ylim(0, clim)
+    ax2.set_theta_offset(np.pi/2)
+    #ax2.set_theta_direction(-1)
+    #10 ms circle
+    ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
+    #ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
+    #plot data
+    wdir, spd = kin.uv2spddir(u, v)
+    #print("u:", u, "v:", v, " \twdir:", wdir*180./np.pi)
+    #wdir[1:] = (wdir[1:] + wdir[:-1])/2
+    #spd[1:] = (spd[1:] + spd[:-1])/2
+    if np.max(spd[:-20]) > 28:
+         kp = np.abs(np.max(wdir[np.where(spd[:-20]>25)])-np.min(wdir[np.where(spd[:-20]>25)]))#/2
+         #kp[np.where(kp[:] <= np.pi/8)] = np.pi/8
+         ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20]>25)])-np.pi/8, np.mean(wdir[np.where(spd[:-20]>25)])+np.pi/8, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
+    ax2.plot(wdir[:10:1], spd[:10:1], 'r-', lw=1.5)
+    ax2.plot(wdir[9:21:2], spd[9:21:2], 'g-', lw=1.5)
+    ax2.plot(wdir[19:-20:2], spd[19:-20:2], 'b-', lw=1.5)
+    ax2.scatter(0, 0, c="k", s=10, marker='x', alpha=0.75)
+
+def basic_plot (cape_fld, u, v, lats, lons, hour, start, titel='CAPE'):
+    """
+    Parameters:
+    ------------
+    cape_fld   : CAPE field
+    u, v       : wind components
+    lats       :
+    lons       :
+    hour       :
+    start      :
+
+    Returns:
+    --------
+    None
+    """
+    
+    # create colormap for CAPE field
+    clevs = np.array([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000])
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
+
+    fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
+    plt.title(titel, fontsize=15)
+
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap, extend = 'max', alpha=0.4, antialiased=True)
+    #cb = plt.colorbar(wx, ticks=clevs, shrink=.8)
+    #cb.set_label(r'$m^2/s^2$')
+
+    #cleves = np.array([500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000])
+    #cs = plt.contour(lons, lats, wx_fld[:, :], levels=cleves, transform=crs.PlateCarree(), colors='k', linewidths=0.8)
+    #plt.clabel(cs, np.array([500, 1000, 2000, 3000]), fontsize=7, inline=1, fmt='%.f') # contour labels
+       
+    for i in range(280, 410, 10):
+        #j=592
+        for j in range(420, 670, 15):
+            if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > 10.0: #np.mean(ko_fld[i-1:i+1, j-1:j+1]) < 0.0: #
+                hodopoint((lons[i, j], lats[i, j]), np.mean(u[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), np.mean(v[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1, proj=crs.PlateCarree())
+
+    #divider = make_axes_locatable(ax)
+    #cax = divider.append_axes("bottom", size="5%", pad=0.01)
+    #plt.colorbar(wx, cax=cax, orientation='horizontal')
+    
+    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    fig.colorbar(wx, cax=cax, orientation='horizontal')
+    
+    
+    ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: 20-40 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
+    name = f"hodo_ce_{hour}.png"
+    plt.savefig(name)
+    name = f"hodo_ce_{hour}.svg"
+    plt.savefig(name)
+    plt.close()
+    
+    
+    fig, ax = east_de(hour, start, projection=crs.PlateCarree())
+    plt.title(titel, fontsize=15)
+    
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap, extend = 'max', alpha=0.4, antialiased=True)
+    
+    #cleves = np.array([-20, -2, 20])
+    #cs = plt.contour(lons, lats, ko_fld[:, :], levels=cleves, transform=crs.PlateCarree(), colors='k', linewidths=0.8)
+    #plt.clabel(cs, np.array([-20, -2, 20]), fontsize=7, inline=1, fmt='%.f')
+    
+    for i in range(340, 400, 5):
+        #j=592
+        for j in range(555, 665, 5):
+            if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > 10.0: #np.mean(ko_fld[i-1:i+1, j-1:j+1]) < -2.0: #
+                hodopoint((lons[i, j], lats[i, j]), np.mean(u[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), np.mean(v[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1, proj=crs.PlateCarree())
+    
+    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    fig.colorbar(wx, cax=cax, orientation='horizontal')
+    
+    
+    ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: 20-40 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
+    name = f"hodo_east_{hour}.png"
+    plt.savefig(name)
+    #name = f"hodo_east_{hour}.svg"
+    #plt.savefig(name)
+    plt.close()
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+def nixon_hodograph(point, u, v, p, height, ax, width=0.1, clim=40, proj=crs.EuroPP()):
+    #float(sys.argv[6]), float(sys.argv[7])
+    """
+    u, v : horizontal wind components
+    rstu, rstv : storm motion vector for right mover
+    """
+    
+    i=0
+    while height[i] < 500 :
+        i += 1
+    i_500m = deepcopy(i)
+
+    while height[i] < 5500:
+        i += 1
+    i_5km = deepcopy(i)
+    while height[i] < 6000:
+        i += 1
+    i_6km = deepcopy(i)
+    
+    rstu, rstv, lstu, lstv, mwu6, mwv6 = kin.non_parcel_bunkers_motion_experimental(u, v, p, i_500m, i_5km, i_6km)
+    
+    u-=rstu
+    v-=rstv
+    
+    #plot
+    test = ax.transData.transform(point)
+    #print(test)
+    #this should take us from the display coordinates to the axes coordinates.
+    trans = ax.transAxes.inverted().transform(test)
+    #print(p_a_data)
+    # convert from data to cartesian coordinates
+    #trans = proj_cart.transform_point(src_crs=proj, x=point[0], y=point[1])
+    #print(trans)
+    #trans=(0.5, 0.5)
+    #create new axe
+    ax2 = plt.axes([trans[0]-width/2, trans[1]-width/2, width, width], projection='polar')
+
+    ax2.get_xaxis().set_visible(False)
+    ax2.get_yaxis().set_visible(False)
+    #ax2.patch.set_visible(False)
+    ax2.set_frame_on(False)
+    #ax2.set_xlim(-clim, clim)
+    ax2.set_ylim(0, clim)
+    ax2.set_theta_offset(np.pi/2)
+    #ax2.set_theta_direction(-1)
+    #10 ms circle
+    ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
+    #ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
+    #plot data
+    wdir, spd = kin.uv2spddir(u, v)
+    #print("u:", u, "v:", v, " \twdir:", wdir*180./np.pi)
+    #wdir[1:] = (wdir[1:] + wdir[:-1])/2
+    #spd[1:] = (spd[1:] + spd[:-1])/2
+
+    ax2.plot(wdir[:10:1], spd[:10:1], 'r-', lw=1.5)
+    ax2.plot(wdir[9:21:2], spd[9:21:2], 'g-', lw=1.5)
+    ax2.plot(wdir[19:-20:2], spd[19:-20:2], 'b-', lw=1.5)
+    ax2.scatter(0, 0, c="k", s=2, marker='x', alpha=0.75)
+    
+    theta, mag = kin.uv2spddir(rstu, rstv)
+    ax2.arrow(theta, 0, 0, mag, head_width=0.1, head_length=0.1)
+
+
+#def nixon_proj (cape_fld, dls_fld, u, v, lat, lon, hour, start):
+def nixon_proj (cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start):
+    """
+    Nixon projection
+    cape_fld : 2D cape field
+    dls_fld  : 2D deep layer shear field or brn shear ...
+    u, v : wind components
+    high : model level high
+    or 
+    rstu, rstv : storm motion vector
+    
+    background filed is cape ...
+    only hodos with more the 10 m/s dls
+    """
+    
+    
+    titel = 'CAPE with Hodographs'
+
+    fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
+    plt.title(titel, fontsize=15)
+
+    clevs = np.array([20, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500])
+    #clevs = np.array([20, 50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500])
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])	
+
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap, extend = 'max', alpha=0.4)
+    #cb = plt.colorbar(wx, ticks=clevs, shrink=.8)
+    #cb.set_label(r'$m^2/s^2$')
+
+    #cleves = np.array([500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000])
+    #cs = plt.contour(lons, lats, wx_fld[:, :], levels=cleves, transform=crs.PlateCarree(), colors='k', linewidths=0.8)
+    #plt.clabel(cs, np.array([500, 1000, 2000, 3000]), fontsize=7, inline=1, fmt='%.f') # contour labels
+    
+    for i in range(280, 410, 10):
+        #j=592
+        for j in range(420, 670, 15):
+            if np.mean(dls_fld[i-1:i+1, j-1:j+1]) > 10.0 and np.mean(cape_fld[i-1:i+1, j-1:j+1]) > 10.0:#m/s
+                nixon_hodograph((lons[i, j], lats[i, j]), np.mean(u[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), np.mean(v[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), np.mean(p[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), np.mean(high[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1, proj=crs.PlateCarree())
+
+   
+    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    fig.colorbar(wx, cax=cax, orientation='horizontal')
+    ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
+    
+    ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: 20-40 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
+    name = f"nixon_ce_{hour}.png"
+    plt.savefig(name)
+    name = f"nixon_ce_{hour}.svg"
+    plt.savefig(name)
+    plt.close()

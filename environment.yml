@@ -1,0 +1,12 @@
+name: HodographMaps
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - matplotlib
+  - cartopy
+  - requests
+  - pygrib
+  - netcdf4
+  - pyyaml

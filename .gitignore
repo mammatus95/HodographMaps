@@ -1,0 +1,23 @@
+# ignore ALL .log files
+
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+*/*/.ipynb_checkpoints/
+
+*/*.csv
+*/*/*.csv
+
+*/*.png
+*/*/*.png
+
+*/*.svg
+*/*/*.svg
+
+*/*.jpg
+*/*/*.jpg
+
+*.log
+*/*.log
+
+src/invariant
+src/iconnest
