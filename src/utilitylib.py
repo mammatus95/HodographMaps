@@ -11,13 +11,12 @@ import numpy as np
 
 
 def datum (h, start):
-    z = '36'
-    a = type(z)
-    if (type(h) == a):
+    if not isinstance(h, int):
         h = int(h)
-        # type(h)
-    if (type(start) == a):
+
+    if not isinstance(start, int):
         start = int(start)
+
     today = datetime.date.today()
     today = today.timetuple()
     x = datetime.datetime(today.tm_year, today.tm_mon, today.tm_mday, start)
@@ -45,6 +44,7 @@ def load_yaml(yaml_file, yaml_path='./'):
 # https://opendata.dwd.de/weather/nwp/icon-eu/grib/00/cape_ml/icon-eu_europe_regular-lat-lon_single-level_2024022700_006_CAPE_ML.grib2.bz2
 # https://opendata.dwd.de/weather/nwp/icon-eu/grib/00/u/icon-eu_europe_regular-lat-lon_model-level_2024022700_000_10_U.grib2.bz2
 
+
 def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
 
     opendataserver="https://opendata.dwd.de/weather/nwp/icon-eu/grib"
@@ -57,8 +57,8 @@ def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
     
     print("Download complete.")
 
-
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./iconnest/"):
     date_string = datetime_obj.strftime("%Y%m%d")
@@ -95,25 +95,24 @@ def open_gribfile_multi(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/
     # Convert missing values to NaNs
     data[data == first_message.missingValue] = np.nan
 
-    lats, lons = first_message.latlons()
     grbs.close()
 
     # print("Data shape:", data.shape)
     print("Maximum:", np.nanmax(data))
     return data
 
-
 # ---------------------------------------------------------------------------------------------------------------------
 
+
 def open_netcdf(fieldname, path="./iconnest/"):
-    data = Dataset(path+fieldname, 'r')
+    data = Dataset(f"{path}{fieldname}", 'r')
 
     lat = data.variables['lat'][:]
     lon = data.variables['lon'][:]
 
-    lons, lats= np.meshgrid(lon, lat)
+    lons, lats = np.meshgrid(lon, lat)
 
-    data = data.variables[fieldname.lower()][0,:,:,:].filled(np.nan) 
+    data = data.variables[fieldname.lower()][0, :, :, :].filled(np.nan)
 
     data.close()
 

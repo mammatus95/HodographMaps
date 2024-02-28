@@ -24,13 +24,14 @@ conda activate HodographMaps
 cd src
 bash download_script.sh
 conda activate HodographMaps
+python3 main.py Basic
 ```
 
 ## Cartopy?
 
-https://github.com/mammatus95/cartopy
-https://scitools.org.uk/cartopy/docs/latest/#
+- https://github.com/mammatus95/cartopy
+- https://scitools.org.uk/cartopy/docs/latest/#
 
 ## Datasource
-ICON Nest: https://opendata.dwd.de/weather/nwp/icon-eu/
-IFS: https://www.ecmwf.int/en/forecasts/datasets/open-data
+- ICON Nest: https://opendata.dwd.de/weather/nwp/icon-eu/
+- IFS: https://www.ecmwf.int/en/forecasts/datasets/open-data

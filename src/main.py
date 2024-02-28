@@ -76,7 +76,8 @@ def main():
         cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, run, fp, path="./iconnest/")
         assert cape_fld.shape == (model.getnlat, model.getnlon), "Shape inconsistency"
         plotlib.test_plot (cape_fld, lats, lons, fp, run, titel='CAPE')
-    else:
+    
+    elif args.mode == "Basic":
         cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, run, fp, path="./iconnest/")
 
         steps=config["steps"]
@@ -102,9 +103,48 @@ def main():
                 break
     
         print(np.nanmean(u_fld, axis=(1,2)))
+        plotlib.basic_plot (cape_fld, u_fld, v_fld, lats, lons, fp, run, titel='CAPE', threshold=config["threshold"])
+        plotlib.basic_plot_custarea (cape_fld, u_fld, v_fld, lats, lons, fp, run, titel='CAPE', threshold=config["threshold"])
+    elif args.mode == "Nixon":
+        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, run, fp, path="./iconnest/")
 
-        plotlib.basic_plot (cape_fld, u_fld, v_fld, lats, lons, 9, 0, titel='CAPE', threshold=config["threshold"])
+        steps=config["steps"]
+        nlvl = int(model.getnlev()/steps)
+        u_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        u_fld.fill(np.nan)
+        v_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        v_fld.fill(np.nan)
+        h_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        h_fld.fill(np.nan)
+        p_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        p_fld.fill(np.nan)
 
+        if config["levels"][0] > config["levels"][1]:
+            steps *= -1
+        elif config["levels"][0] == config["levels"][1]:
+            print("Wrong levels in config.yml!")
+            exit(0)
+
+        lvl_idx = 0
+        for level in range(config["levels"][0], config["levels"][1], steps):
+            u_fld[lvl_idx,:,:] = ut.open_gribfile_multi("U", level, rundate, run, fp, path="./iconnest/")
+            v_fld[lvl_idx,:,:] = ut.open_gribfile_multi("V", level, rundate, run, fp, path="./iconnest/")
+            h_fld[lvl_idx,:,:] = ut.open_gribfile_multi("H", level, rundate, run, fp, path="./iconnest/")
+            p_fld[lvl_idx,:,:] = ut.open_gribfile_multi("P", level, rundate, run, fp, path="./iconnest/")
+
+            lvl_idx += 1
+            if lvl_idx >= nlvl:
+                break
+    
+        print(np.nanmean(p_fld, axis=(1,2)))
+
+        du = np.subtract(u_fld[30,:,:], u_fld[0,:,:])
+        dv = np.subtract(v_fld[30,:,:], v_fld[0,:,:])
+        dls_fld = np.sqrt(np.add(np.square(du), np.square(dv)))
+        plotlib.nixon_proj(cape_fld, dls_fld, u_fld, v_fld, p_fld, h_fld, lats, lons, fp, run, imfmt="png")
+    else: 
+        print("Wrong command line argument")
+        exit(-1)
 
 
 if __name__ == "__main__":

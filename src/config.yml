@@ -10,3 +10,11 @@ threshold: 0
 fontsize: 12
 titlesize: 18
 
+# customize
+customize: # east de
+  lon1: 10.7
+  lon2: 18
+  lat1: 49.8
+  lat2: 54.8
+
+# 10.77, 18.92, 49.80, 55.06

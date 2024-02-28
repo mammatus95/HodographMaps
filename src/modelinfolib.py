@@ -72,7 +72,9 @@ latmax = 90
 d_grad = 0.75
 """
 
+
 class MODELIFNO:
+
     def __init__(self, nlon, nlat, nlev, d_grad):
         self.points = nlon*nlat
         self.nlon = nlon
@@ -80,6 +82,7 @@ class MODELIFNO:
         self.nlev = nlev
         self.d_grad = d_grad
 
+    """
     def __init__(self, nlon, nlat, nlev, lonmin, lonmax, latmin, latmax, d_grad):
         self.points = nlon*nlat
         self.nlon = nlon
@@ -87,6 +90,7 @@ class MODELIFNO:
         self.nlev = nlev
         self.d_grad = d_grad
         print(lonmin, lonmax, latmin, latmax)
+    """
 
     def __str__(self):
         return (
@@ -94,13 +98,13 @@ class MODELIFNO:
                 f"Number of Longitudes: {self.nlon}\nNumber of Latitudes: {self.nlat}\n"
                 f"Number of Levels: {self.nlev}\nGradient: {self.d_grad}"
                )
-    
+
     def getpoints(self):
         return self.points
 
     def getnlon(self):
         return self.nlon
-    
+
     def getnlat(self):
         return self.nlat
 
@@ -110,7 +114,8 @@ class MODELIFNO:
     def getd_grad(self):
         return self.d_grad
 
+
 # Example usage:
-icon_nest = MODELIFNO(1377, 657, 51, -23.5, 45.0, 29.5, 70.5, 0.0625)
+icon_nest = MODELIFNO(1377, 657, 51, 0.0625)
 cosmo_d2 = MODELIFNO(651, 716, 65, 0.02)
 ifs = MODELIFNO(450, 900, 10, 0.4)
