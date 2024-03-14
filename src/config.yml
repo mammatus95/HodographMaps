@@ -1,9 +1,12 @@
 run: 0
 fp: 9
-default_date: "2024-02-27"
+default_date: "2024-03-14"
 
-levels: [60,10]
+levels: [74,20]
 steps: 1  # level steps
+
+hodomap : True
+soundmap : True
 
 threshold: 0
 

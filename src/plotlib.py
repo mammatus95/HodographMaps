@@ -148,15 +148,99 @@ def test_plot (cape_fld, lats, lons, hour, run, titel='CAPE'):
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+def soundingpoint(point, temp, ax, width=0.1, proj='polar', smooth=False):
+    """
+    Parameters:
+    ------------
+    point : tuple of data coordinates (10, 55)
+    temp  : temperature
+    width : width of added axes for the soundings as fig coordinates (examples: 0.5 are half of the image)
+    proj  : 'polar'
+
+    Returns:
+    --------
+    None
+    """
+
+    # this takes us from the data coordinates to the display coordinates.
+    test = ax.transData.transform(point)
+
+    # this should take us from the display coordinates to the axes coordinates.
+    trans = ax.transAxes.inverted().transform(test)
+
+    # create new axes
+    ax2 = plt.axes([trans[0]-width/2, trans[1]-width/2, width, width])
+
+    ax2.get_xaxis().set_visible(False)
+    ax2.get_yaxis().set_visible(False)
+    ax2.set_frame_on(False)
+
+    # ax2.set_xlim(-, )
+    # ax2.set_ylim(0, )
+
+    # 10 ms circle
+    #ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
+    # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
+
+    # calculate dewpoint
+
+    # smoothing
+    if smooth is True:
+        temp[1:] = (temp[1:] + temp[:-1])/2
+   
+    ax2.plot(temp[:40:1]-273.15, np.arange(temp[:40:1].size), 'r-', lw=1.5)
+    ax2.vlines(x=0, ymin=0, ymax=40, colors='purple', ls='--', lw=0.6) # freezing level
+    #ax2.invert_xaxis()
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+def sounding_plot(cape_fld, temp, lats, lons, hour, start, titel='CAPE', imfmt="png"):
+    """
+    Parameters:
+    ------------
+    cape_fld   : CAPE field
+    temp       : temperature
+    lats       :
+    lons       :
+    hour       :
+    start      :
+
+    Returns:
+    --------
+    None
+    """
+
+    fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
+    plt.title(titel, fontsize=titlesize)
+
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap, 
+                     extend='max', alpha=0.4, antialiased=True)
+
+    for i in range(275, 415, 10):
+        for j in range(420, 670, 15):
+            soundingpoint((lons[i, j], lats[i, j]),
+                           np.mean(temp[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
+                           ax, width=0.05)  # , proj=crs.PlateCarree()
+
+    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    fig.colorbar(wx, cax=cax, orientation='horizontal')
+    ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('red dot line: freezing level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
+
+    name = f"./images/soundingmap_ce_{hour}.{imfmt}"
+    plt.savefig(name)
+    plt.close()
+
+# ---------------------------------------------------------------------------------------------------------------------
 
 def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
     """
     Parameters:
     ------------
-    width : width of added axes for the hodo as fig coordinates (examples: 0.5 are half of the image)
-    clim  : max. wind speed magnitude of the hodo
     point : tuple of data coordinates (10, 55)
     u, v  : wind components
+    width : width of added axes for the hodograph as fig coordinates (examples: 0.5 are half of the image)
+    clim  : max. wind speed magnitude of the hodograph
     proj  : 'polar'
 
     Returns:
@@ -232,16 +316,19 @@ def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=
         for j in range(420, 670, 15):
             if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > threshold:
                 hodopoint((lons[i, j], lats[i, j]),
-                          np.mean(u[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          np.mean(v[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)  # , proj=crs.PlateCarree()
+                          np.mean(u[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
+                          np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)  # , proj=crs.PlateCarree()
 
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
+    if "CAPE" in titel:
+        ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
+    else:
+        ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
     ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
     ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue: 20-40 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: 20-50 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
     ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
 
     name = f"./images/hodographmap_ce_{hour}.{imfmt}"
@@ -272,7 +359,7 @@ def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', t
     ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
     ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
     ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue: 20-40 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: 20-50 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
     ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
 
     name = f"./images/hodographmap_area_{hour}.{imfmt}"
@@ -351,7 +438,7 @@ def nixon_proj(cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start, imfmt=
     rstu, rstv : storm motion vector
     
     background filed is cape ...
-    only hodos with more the 10 m/s dls
+    only hodographs with more the 10 m/s dls
     """
 
     titel = 'CAPE with Hodographs'

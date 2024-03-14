@@ -15,7 +15,9 @@ conda activate HodographMaps
 
 ![Example](images/example.png)
 
-![Example](images/hodographmap_ce_9.png)
+![Map of Hodographs](images/hodographmap_ce_9.png)
+
+![Map of Soundings](images/soundingmap_ce_9.png)
 
 
 ## How to run
@@ -24,7 +26,12 @@ conda activate HodographMaps
 cd src
 bash download_script.sh
 conda activate HodographMaps
+
+# Plot Hodograph
 python3 main.py Basic
+
+# Plot Soundings
+python3 main.py Sounding
 ```
 
 ## Cartopy?

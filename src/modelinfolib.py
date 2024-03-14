@@ -75,12 +75,13 @@ d_grad = 0.75
 
 class MODELIFNO:
 
-    def __init__(self, nlon, nlat, nlev, d_grad):
+    def __init__(self, nlon, nlat, d_grad, nlev, levtyp):
         self.points = nlon*nlat
         self.nlon = nlon
         self.nlat = nlat
         self.nlev = nlev
         self.d_grad = d_grad
+        self.levtyp = levtyp
 
     """
     def __init__(self, nlon, nlat, nlev, lonmin, lonmax, latmin, latmax, d_grad):
@@ -96,7 +97,8 @@ class MODELIFNO:
         return (
                 f"Model Information:\nPoints: {self.points}\n"
                 f"Number of Longitudes: {self.nlon}\nNumber of Latitudes: {self.nlat}\n"
-                f"Number of Levels: {self.nlev}\nGradient: {self.d_grad}"
+                f"Horizontal resolution: {self.d_grad}\n"
+                f"Number of Levels: {self.nlev}\tLeveltyps: {self.levtyp}\n"
                )
 
     def getpoints(self):
@@ -111,11 +113,13 @@ class MODELIFNO:
     def getnlev(self):
         return self.nlev
 
+    def getlevtyp(self):
+        return self.d_grad
+
     def getd_grad(self):
         return self.d_grad
 
-
 # Example usage:
-icon_nest = MODELIFNO(1377, 657, 51, 0.0625)
-cosmo_d2 = MODELIFNO(651, 716, 65, 0.02)
-ifs = MODELIFNO(450, 900, 10, 0.4)
+icon_nest = MODELIFNO(1377, 657, 0.0625, 54, "model") # lowest 74 and we download till 20
+cosmo_d2 = MODELIFNO(651, 716, 0.02, 65, "model")
+ifs = MODELIFNO(450, 900, 0.4, 10, "pres")

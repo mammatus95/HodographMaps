@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description="Hodograph Maps")
     # Add positional argument
     parser.add_argument('mode', type=str, 
-                        help='Mode: Test, Basic, or Nixon')
+                        help='Mode: Test, Basic, Sounding, or Nixon')
 
     # Add optional argument
     parser.add_argument('-f', '--field', type=str, 
@@ -42,7 +42,7 @@ def main():
     if args.field == None:
         args.field = "CAPE ML"
 
-    if (args.field != "CAPE ML") and (args.field != "CAPE CON") and (args.field != "LPI"):
+    if (args.field != "CAPE ML") and (args.field != "CAPE CON") and (args.field != "LPI") and (args.field != "WMAXSHEAR"):
         print("Unknown field")
         exit(-1)
 
@@ -76,7 +76,36 @@ def main():
         cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, run, fp, path="./iconnest/")
         assert cape_fld.shape == (model.getnlat, model.getnlon), "Shape inconsistency"
         plotlib.test_plot (cape_fld, lats, lons, fp, run, titel='CAPE')
+
+    elif args.mode == "Sounding":
+        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, run, fp, path="./iconnest/")
+
+        steps=config["steps"]
+        nlvl = int(model.getnlev()/steps)
+        t_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        t_fld.fill(np.nan)
+        q_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        q_fld.fill(np.nan)
+        p_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        p_fld.fill(np.nan)
+        
+        if config["levels"][0] > config["levels"][1]:
+            steps *= -1
+        elif config["levels"][0] == config["levels"][1]:
+            print("Wrong levels in config.yml!")
+            exit(0)
+
+        lvl_idx = 0
+        for level in range(config["levels"][0], config["levels"][1], steps):
+            t_fld[lvl_idx,:,:] = ut.open_gribfile_multi("T", level, rundate, run, fp, path="./iconnest/")
+            q_fld[lvl_idx,:,:] = ut.open_gribfile_multi("QV", level, rundate, run, fp, path="./iconnest/")
+
+            lvl_idx += 1
+            if lvl_idx >= nlvl:
+                break
     
+        print(np.nanmean(t_fld, axis=(1,2))-273.15)
+        plotlib.sounding_plot (cape_fld, t_fld, lats, lons, fp, run, titel='CAPE')
     elif args.mode == "Basic":
         cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, run, fp, path="./iconnest/")
 

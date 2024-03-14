@@ -71,9 +71,9 @@ do
     bzip2 -dfq ${store_path}/${regular_single}${T}_${N}.grib2.bz2
   done
 
-  for H in {10..60}
+  for H in {20..74}
   do
-    for N in U V
+    for N in U V T QV P
     do
       typeset -l nvar
       nvar=${N}
@@ -83,12 +83,8 @@ do
   done
 
   #rm -f 
-  python3 main.py Basic --fp ${X} --run ${R} --date $(date)
+  python3 main.py $(pwd)/Basic --fp ${X} --run ${R} --date $(date)
 
   echo "done with ${T}"
 done
-
-
-
-
 
