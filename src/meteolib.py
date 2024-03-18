@@ -1,16 +1,22 @@
 #!/usr/bin/python3
 ################################
 #
-# kinematiclib 
+# Meteorology library 
 #
 ################################
 
 import numpy as np
 
+# ---------------------------------------------------------------------------------------------------------------------
+# constants
+
+ROCP = 0.28571426       # R over Cp
+ZEROCNK = 273.15        # Zero Celsius in Kelvins
+GRAV = 9.80665          # Gravity
+TOL = 1e-10             # Floating Point Tolerance
 
 def uv2spddir(u,v):
-    val = 180./np.pi
-    rad = np.pi/180
+
     direction = np.rad2deg(np.arctan2(-u,v))
 
     if type(direction) == np.ndarray:
@@ -21,6 +27,44 @@ def uv2spddir(u,v):
 
     return (np.deg2rad(direction), np.sqrt(u*u + v*v))
 
+# ---------------------------------------------------------------------------------------------------------------------
+# thermodynamics
+
+
+def q_to_mixrat(q):
+    """
+    Parameters
+    ----------
+    q : specific humidity in kg/kg
+    """
+    return q/(1.0-q)
+
+def temp_at_mixrat(w, p):
+    """
+    Returns the temperature in K of air at the given mixing ratio in g/kg and pressure in hPa
+
+    Parameters
+    ----------
+    w : Mixing Ratio in g/kg as numpy.array
+    p : Pressure in hPa as numpy.array
+
+    Returns
+    -------
+    Temperature in K of air at given mixing ratio and pressure
+
+    """
+
+    # Constants Used
+    c1 = 0.0498646455 ; c2 = 2.4082965 ; c3 = 7.07475
+    c4 = 38.9114 ; c5 = 0.0915 ; c6 = 1.2035
+
+    x = np.log10(w * p / (622. + w))
+    x = (np.power(10.,((c1 * x) + c2)) - c3 + (c4 * np.power((np.power(10,(c5 * x)) - c6),2)))
+    return x
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# kinematics
 
 def mean_wind(u, v, ps, stu=0, stv=0):
     """

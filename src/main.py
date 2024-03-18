@@ -99,13 +99,14 @@ def main():
         for level in range(config["levels"][0], config["levels"][1], steps):
             t_fld[lvl_idx,:,:] = ut.open_gribfile_multi("T", level, rundate, run, fp, path="./iconnest/")
             q_fld[lvl_idx,:,:] = ut.open_gribfile_multi("QV", level, rundate, run, fp, path="./iconnest/")
+            p_fld[lvl_idx,:,:] = ut.open_gribfile_multi("P", level, rundate, run, fp, path="./iconnest/")
 
             lvl_idx += 1
             if lvl_idx >= nlvl:
                 break
     
         print(np.nanmean(t_fld, axis=(1,2))-273.15)
-        plotlib.sounding_plot (cape_fld, t_fld, lats, lons, fp, run, titel='CAPE')
+        plotlib.sounding_plot (cape_fld, t_fld, q_fld, p_fld, lats, lons, fp, run, titel='CAPE')
     elif args.mode == "Basic":
         cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, run, fp, path="./iconnest/")
 

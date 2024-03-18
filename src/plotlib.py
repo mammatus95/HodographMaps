@@ -8,6 +8,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap  # ListedColormap, BoundaryNorm,
+from matplotlib.projections import register_projection
 
 # cartopy
 import cartopy.crs as crs
@@ -18,7 +19,8 @@ states_provinces = cfeature.NaturalEarthFeature(
 
 # own moduls
 import utilitylib as ut
-import kinematiclib as kin
+import meteolib as met
+from skewT import *
 
 # ---------------------------------------------------------------------------------------------------------------------
 # create plot class
@@ -114,6 +116,7 @@ def two_plots(projection=crs.EuroPP(), lon1=3.56, lon2=16.5, lat1=46.2, lat2=55.
 clevs = np.array([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
                   1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000])
 cmap = LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
+cmap2= LinearSegmentedColormap.from_list("", ["gold", "orange", "darkorange", "red", "darkred", "darkmagenta"])
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -148,7 +151,7 @@ def test_plot (cape_fld, lats, lons, hour, run, titel='CAPE'):
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-def soundingpoint(point, temp, ax, width=0.1, proj='polar', smooth=False):
+def soundingpoint(point, temp, q, pres, ax, width=0.1, proj='skewT', smooth=False):
     """
     Parameters:
     ------------
@@ -161,6 +164,7 @@ def soundingpoint(point, temp, ax, width=0.1, proj='polar', smooth=False):
     --------
     None
     """
+    register_projection(SkewXAxes)
 
     # this takes us from the data coordinates to the display coordinates.
     test = ax.transData.transform(point)
@@ -169,7 +173,7 @@ def soundingpoint(point, temp, ax, width=0.1, proj='polar', smooth=False):
     trans = ax.transAxes.inverted().transform(test)
 
     # create new axes
-    ax2 = plt.axes([trans[0]-width/2, trans[1]-width/2, width, width])
+    ax2 = plt.axes([trans[0]-width/2, trans[1]-width/2, width, width])  # , projection='skewx')
 
     ax2.get_xaxis().set_visible(False)
     ax2.get_yaxis().set_visible(False)
@@ -183,18 +187,23 @@ def soundingpoint(point, temp, ax, width=0.1, proj='polar', smooth=False):
     # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
     # calculate dewpoint
+    pres /= 100
+    dewpoint = met.temp_at_mixrat( met.q_to_mixrat(q)*1000.0, pres )
 
     # smoothing
     if smooth is True:
         temp[1:] = (temp[1:] + temp[:-1])/2
+        dewpoint[1:] = (dewpoint[1:] + dewpoint[:-1])/2
    
-    ax2.plot(temp[:40:1]-273.15, np.arange(temp[:40:1].size), 'r-', lw=1.5)
-    ax2.vlines(x=0, ymin=0, ymax=40, colors='purple', ls='--', lw=0.6) # freezing level
+    ax2.semilogy(temp[:40:1]-met.ZEROCNK, pres[:40:1], 'b-', lw=1.5)
+    ax2.semilogy(dewpoint[:40:1]-met.ZEROCNK, pres[:40:1], 'g-', lw=1.5)
+    ax2.vlines(x=0, ymin=300, ymax=1000, colors='purple', ls='--', lw=0.6) # freezing level
+    ax2.set_ylim(1050,300)
     #ax2.invert_xaxis()
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-def sounding_plot(cape_fld, temp, lats, lons, hour, start, titel='CAPE', imfmt="png"):
+def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='CAPE', imfmt="png"):
     """
     Parameters:
     ------------
@@ -213,20 +222,26 @@ def sounding_plot(cape_fld, temp, lats, lons, hour, start, titel='CAPE', imfmt="
     fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
     plt.title(titel, fontsize=titlesize)
 
-    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap, 
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap2, 
                      extend='max', alpha=0.4, antialiased=True)
+    
+    
+
 
     for i in range(275, 415, 10):
         for j in range(420, 670, 15):
             soundingpoint((lons[i, j], lats[i, j]),
                            np.mean(temp[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
+                           np.mean(q_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
+                           np.mean(p_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
                            ax, width=0.05)  # , proj=crs.PlateCarree()
 
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
     ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('red dot line: freezing level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
-
+    ax.annotate('red dot line: freezing level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue lines: temperature', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green lines: dewpoints', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
     name = f"./images/soundingmap_ce_{hour}.{imfmt}"
     plt.savefig(name)
     plt.close()
@@ -271,7 +286,7 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
     # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
     # plot data
-    wdir, spd = kin.uv2spddir(u, v)
+    wdir, spd = met.uv2spddir(u, v)
 
     # smoothing
     if smooth is True:
@@ -387,7 +402,7 @@ def nixon_hodograph(point, u, v, p, height, ax, width=0.1, clim=40, proj='polar'
         i += 1
     i_6km = deepcopy(i)
 
-    rstu, rstv, lstu, lstv, mwu6, mwv6 = kin.non_parcel_bunkers_motion_experimental(u, v, p, i_500m, i_5km, i_6km)
+    rstu, rstv, lstu, lstv, mwu6, mwv6 = met.non_parcel_bunkers_motion_experimental(u, v, p, i_500m, i_5km, i_6km)
 
     u-=rstu
     v-=rstv
@@ -411,7 +426,7 @@ def nixon_hodograph(point, u, v, p, height, ax, width=0.1, clim=40, proj='polar'
     ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
 
     # plot data
-    wdir, spd = kin.uv2spddir(u, v)
+    wdir, spd = met.uv2spddir(u, v)
 
     # smoothing
     if smooth is True:
@@ -423,7 +438,7 @@ def nixon_hodograph(point, u, v, p, height, ax, width=0.1, clim=40, proj='polar'
     ax2.plot(wdir[19:-20:2], spd[19:-20:2], 'b-', lw=1.5)
     ax2.scatter(0, 0, c="k", s=2, marker='x', alpha=0.75)
     
-    theta, mag = kin.uv2spddir(rstu, rstv)
+    theta, mag = met.uv2spddir(rstu, rstv)
     ax2.arrow(theta, 0, 0, mag, head_width=0.1, head_length=0.1)
 
 
