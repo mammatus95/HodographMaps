@@ -26,13 +26,13 @@ def main():
     # Add optional argument
     parser.add_argument('-f', '--field', type=str, 
                         help='Which background field: CAPE ML, CAPE CON or LPI ')
-    
+
     parser.add_argument('-d', '--date', type=str, 
                         help='Date Format YYYY-MM-DD')
-    
+
     parser.add_argument('-fp', '--fp', type=str, 
                         help='Leadtime or forecast periode')
-    
+
     parser.add_argument('-r', '--run', type=str, 
                         help='Run (0,6,12,18,.. .etc)')
 
@@ -65,11 +65,9 @@ def main():
     fieldname = args.field.replace(" ", "_")
 
 
-    
     print(f"\nDate: {rundate}\n Arguments: {args} \nConfig-File: {config}\n\n")
 
     #ut.download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./")
-
 
     
     if args.mode == "Test":
@@ -88,7 +86,7 @@ def main():
         q_fld.fill(np.nan)
         p_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
         p_fld.fill(np.nan)
-        
+
         if config["levels"][0] > config["levels"][1]:
             steps *= -1
         elif config["levels"][0] == config["levels"][1]:
@@ -104,7 +102,7 @@ def main():
             lvl_idx += 1
             if lvl_idx >= nlvl:
                 break
-    
+
         print(np.nanmean(t_fld, axis=(1,2))-273.15)
         plotlib.sounding_plot (cape_fld, t_fld, q_fld, p_fld, lats, lons, fp, run, titel='CAPE')
     elif args.mode == "Basic":
@@ -116,7 +114,7 @@ def main():
         u_fld.fill(np.nan)
         v_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
         v_fld.fill(np.nan)
-        
+
         if config["levels"][0] > config["levels"][1]:
             steps *= -1
         elif config["levels"][0] == config["levels"][1]:
@@ -165,14 +163,14 @@ def main():
             lvl_idx += 1
             if lvl_idx >= nlvl:
                 break
-    
+
         print(np.nanmean(p_fld, axis=(1,2)))
 
         du = np.subtract(u_fld[30,:,:], u_fld[0,:,:])
         dv = np.subtract(v_fld[30,:,:], v_fld[0,:,:])
         dls_fld = np.sqrt(np.add(np.square(du), np.square(dv)))
         plotlib.nixon_proj(cape_fld, dls_fld, u_fld, v_fld, p_fld, h_fld, lats, lons, fp, run, imfmt="png")
-    else: 
+    else:
         print("Wrong command line argument")
         exit(-1)
 

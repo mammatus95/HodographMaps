@@ -4,7 +4,6 @@ import datetime
 import requests
 import yaml
 import pygrib
-#from netCDF4 import Dataset
 import numpy as np
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -105,6 +104,7 @@ def open_gribfile_multi(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/
 
 
 def open_netcdf(fieldname, path="./iconnest/"):
+    from netCDF4 import Dataset
     data = Dataset(f"{path}{fieldname}", 'r')
 
     lat = data.variables['lat'][:]

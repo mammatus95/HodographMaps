@@ -58,12 +58,12 @@ fi
 
 
 
-for X in 9 #12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60
+for X in 36 #9 #12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60
 do
   cd ${path_icon}
   T=$(printf "%03d" "$X")
   #single level
-  for N in CAPE_ML #CAPE_CON
+  for N in CAPE_ML CAPE_CON PS
   do
     typeset -l nvar
     nvar=${N}

@@ -82,8 +82,8 @@ def customize_area(hour, start, projection=crs.EuroPP(), lon1=10.7, lon2=18, lat
     ax.add_feature(states_provinces, edgecolor='black')
     string1, string2 = ut.datum(hour, start)
     plt.annotate("ICON Nest (DWD)", xy=(0.02, -0.04), xycoords='axes fraction', fontsize=10)
-    plt.annotate(string1, xy=(0.835, 1), xycoords='axes fraction', fontsize=fontsize)
-    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=fontsize)
+    plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
+    plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
     return fig, ax
 
 
@@ -298,11 +298,13 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
         ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20] > 25)])-np.pi/8,
                              np.mean(wdir[np.where(spd[:-20] > 25)])+np.pi/8, 100),
                              np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
-    
+
     ax2.plot(wdir[:10:1], spd[:10:1], 'r-', lw=1.5)
     ax2.plot(wdir[9:21:2], spd[9:21:2], 'g-', lw=1.5)
     ax2.plot(wdir[19:-20:2], spd[19:-20:2], 'b-', lw=1.5)
     ax2.scatter(0, 0, c="k", s=10, marker='x', alpha=0.75)
+
+# ---------------------------------------------------------------------------------------------------------------------
 
 
 def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
@@ -352,10 +354,10 @@ def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=
     
 def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
 
-    lon1=config["customize"]["lon1"]
-    lon2=config["customize"]["lon2"]
-    lat1=config["customize"]["lat1"]
-    lat2=config["customize"]["lat2"]
+    lon1 = config["customize"]["lon1"]
+    lon2 = config["customize"]["lon2"]
+    lat1 = config["customize"]["lat1"]
+    lat2 = config["customize"]["lat2"]
     fig, ax = customize_area(hour, start, projection=crs.PlateCarree(), lon1=lon1, lon2=lon2, lat1=lat1, lat2=lat2)
     plt.title(titel, fontsize=titlesize)
 
@@ -365,13 +367,16 @@ def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', t
         for j in range(555, 665, 5):
             if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > threshold:
                 hodopoint((lons[i, j], lats[i, j]),
-                          np.mean(u[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          np.mean(v[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)  # , proj=crs.PlateCarree()
+                          np.mean(u[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
+                          np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)  # , proj=crs.PlateCarree()
 
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
+    if "CAPE" in titel:
+        ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
+    else:
+        ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
     ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
     ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
     ax.annotate('blue: 20-50 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
