@@ -154,103 +154,7 @@ def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def soundingpoint(point, temp, q, pres, ax, width=0.1, proj='skewT', smooth=False):
-    """
-    Parameters:
-    ------------
-    point : tuple of data coordinates (10, 55)
-    temp  : temperature
-    width : width of added axes for the soundings as fig coordinates (examples: 0.5 are half of the image)
-    proj  : 'polar'
-
-    Returns:
-    --------
-    None
-    """
-    register_projection(SkewXAxes)
-
-    # this takes us from the data coordinates to the display coordinates.
-    test = ax.transData.transform(point)
-
-    # this should take us from the display coordinates to the axes coordinates.
-    trans = ax.transAxes.inverted().transform(test)
-
-    # create new axes
-    ax2 = plt.axes([trans[0]-width/2, trans[1]-width/2, width, width])  # , projection='skewx')
-
-    ax2.get_xaxis().set_visible(False)
-    ax2.get_yaxis().set_visible(False)
-    ax2.set_frame_on(False)
-
-    # ax2.set_xlim(-, )
-    # ax2.set_ylim(0, )
-
-    # 10 ms circle
-    # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
-    # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
-
-    # calculate dewpoint
-    pres /= 100
-    dewpoint = met.temp_at_mixrat(met.q_to_mixrat(q)*1000.0, pres)
-
-    # smoothing
-    if smooth is True:
-        temp[1:] = (temp[1:] + temp[:-1])/2
-        dewpoint[1:] = (dewpoint[1:] + dewpoint[:-1])/2
-
-    ax2.semilogy(temp[:40:1]-met.ZEROCNK, pres[:40:1], 'b-', lw=1.5)
-    ax2.semilogy(dewpoint[:40:1]-met.ZEROCNK, pres[:40:1], 'g-', lw=1.5)
-    ax2.vlines(x=0, ymin=300, ymax=1000, colors='purple', ls='--', lw=0.6)  # freezing level
-    ax2.set_ylim(1050, 300)
-    # ax2.invert_xaxis()
-
-# ---------------------------------------------------------------------------------------------------------------------
-
-
-def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='CAPE', imfmt="png"):
-    """
-    Parameters:
-    ------------
-    cape_fld   : CAPE field
-    temp       : temperature
-    lats       :
-    lons       :
-    hour       :
-    start      :
-
-    Returns:
-    --------
-    None
-    """
-
-    fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
-    plt.title(titel, fontsize=titlesize)
-
-    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap2,
-                     extend='max', alpha=0.4, antialiased=True)
-
-    for i in range(275, 415, 10):
-        for j in range(420, 670, 15):
-            soundingpoint((lons[i, j], lats[i, j]),
-                          np.mean(temp[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          np.mean(q_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          np.mean(p_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          ax, width=0.05)  # , proj=crs.PlateCarree()
-
-    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
-    fig.colorbar(wx, cax=cax, orientation='horizontal')
-    ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('red dot line: freezing level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue lines: temperature', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('green lines: dewpoints', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    name = f"./images/soundingmap_ce_{hour}.{imfmt}"
-    plt.savefig(name)
-    plt.close()
-
-# ---------------------------------------------------------------------------------------------------------------------
-
-
-def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
+def hodopoint(point, u, v, pres_levels, ax, width=0.1, clim=40, proj='polar', smooth=False):
     """
     Parameters:
     ------------
@@ -295,20 +199,21 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
         spd[1:] = (spd[1:] + spd[:-1])/2
 
     # draw part of second cricle
-    if np.max(spd[:-20]) > 28:
+    if np.max(spd) > 28:
         ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20] > 25)])-np.pi/8,
                              np.mean(wdir[np.where(spd[:-20] > 25)])+np.pi/8, 100),
                  np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
-
-    ax2.plot(wdir[:10:1], spd[:10:1], 'r-', lw=1.5)
-    ax2.plot(wdir[9:21:2], spd[9:21:2], 'g-', lw=1.5)
-    ax2.plot(wdir[19:-20:2], spd[19:-20:2], 'b-', lw=1.5)
+    idx_low = pres_levels.index(850)
+    idx_mid = pres_levels.index(600)
+    ax2.plot(wdir[:idx_low+1:1], spd[:idx_low+1:1], 'r-', lw=1.5)
+    ax2.plot(wdir[idx_low:idx_mid+1:1], spd[idx_low:idx_mid+1:1], 'g-', lw=1.5)
+    ax2.plot(wdir[idx_mid:], spd[idx_mid:], 'b-', lw=1.5)
     ax2.scatter(0, 0, c="k", s=10, marker='x', alpha=0.75)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
+def basic_plot(cape_fld, u, v, pres_levels, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
     """
     Parameters:
     ------------
@@ -335,7 +240,7 @@ def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=
             if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > threshold:
                 hodopoint((lons[i, j], lats[i, j]),
                           np.mean(u[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)  # , proj=crs.PlateCarree()
+                          np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), pres_levels, ax, width=0.1)  # proj=crs.PlateCarree()
 
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
@@ -354,7 +259,7 @@ def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=
     plt.close()
 
 
-def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
+def basic_plot_custarea(cape_fld, u, v, pres_levels, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
     lon1 = config["customize"]["lon1"]
     lon2 = config["customize"]["lon2"]
     lat1 = config["customize"]["lat1"]
@@ -370,7 +275,7 @@ def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', t
             if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > threshold:
                 hodopoint((lons[i, j], lats[i, j]),
                           np.mean(u[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)  # , proj=crs.PlateCarree()
+                          np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), pres_levels, ax, width=0.1)  # proj=crs.PlateCarree()
 
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
@@ -379,9 +284,9 @@ def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', t
         ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
     else:
         ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue: 20-50 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate('red: srf-850hPa', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green: 850-600hPa', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: above 600hPa', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
     ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
 
     name = f"./images/hodographmap_area_{hour}.{imfmt}"

@@ -80,9 +80,9 @@ def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./iconnest/"):
     return data, lats, lons
 
 
-def open_gribfile_multi(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/"):
+def open_icon_gribfile_preslvl(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/"):
     date_string = datetime_obj.strftime("%Y%m%d")
-    nwp_modellevel = "icon-eu_europe_regular-lat-lon_model-level"
+    nwp_modellevel = "icon-eu_europe_regular-lat-lon_pressure-level"
 
     # Open the GRIB file
     grbs = pygrib.open(f"{path}{nwp_modellevel}_{date_string}{run:02d}_{fp:03d}_{lvl}_{fieldname.upper()}.grib2")

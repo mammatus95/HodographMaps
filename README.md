@@ -31,9 +31,6 @@ conda activate HodographMaps
 # Plot Hodograph
 python3 main.py Basic
 
-# Plot Soundings
-python3 main.py Sounding
-
 cd images
 ```
 

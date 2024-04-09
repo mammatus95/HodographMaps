@@ -11,116 +11,42 @@ import numpy as np
 import utilitylib as ut
 import plotlib
 import modelinfolib as model
-model = model.icon_nest
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def run(program_mode, fieldname, rundate, model_run, fp):
+def run(model_obj, program_mode, fieldname, rundate, model_run, fp):
     config = ut.load_yaml('config.yml')
-
+    print(model_obj)
     if program_mode == "Test":
-        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./iconnest/")
-        assert cape_fld.shape == (model.getnlat, model.getnlon), "Shape inconsistency"
+        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./modeldata/")
+        assert cape_fld.shape == (model_obj.getnlat(), model_obj.getnlon()), "Shape inconsistency"
         plotlib.test_plot(cape_fld, lats, lons, fp, model_run, titel='CAPE')
 
-    elif program_mode == "Sounding":
-        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./iconnest/")
-
-        steps = config["steps"]
-        nlvl = int(model.getnlev()/steps)
-        t_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
-        t_fld.fill(np.nan)
-        q_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
-        q_fld.fill(np.nan)
-        p_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
-        p_fld.fill(np.nan)
-
-        if config["levels"][0] > config["levels"][1]:
-            steps *= -1
-        elif config["levels"][0] == config["levels"][1]:
-            print("Wrong levels in config.yml!")
-            exit(0)
-
-        lvl_idx = 0
-        for level in range(config["levels"][0], config["levels"][1], steps):
-            t_fld[lvl_idx, :, :] = ut.open_gribfile_multi("T", level, rundate, model_run, fp, path="./iconnest/")
-            q_fld[lvl_idx, :, :] = ut.open_gribfile_multi("QV", level, rundate, model_run, fp, path="./iconnest/")
-            p_fld[lvl_idx, :, :] = ut.open_gribfile_multi("P", level, rundate, model_run, fp, path="./iconnest/")
-
-            lvl_idx += 1
-            if lvl_idx >= nlvl:
-                break
-
-        print(np.nanmean(t_fld, axis=(1, 2))-273.15)
-        plotlib.sounding_plot(cape_fld, t_fld, q_fld, p_fld, lats, lons, fp, model_run, titel='CAPE')
     elif program_mode == "Basic":
-        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./iconnest/")
+        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./modeldata/")
 
-        steps = config["steps"]
-        nlvl = int(model.getnlev()/steps)
-        u_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        nlvl = int(model_obj.getnlev())
+        u_fld = np.empty(nlvl*model_obj.getpoints()).reshape((nlvl, model_obj.getnlat(), model_obj.getnlon()))
         u_fld.fill(np.nan)
-        v_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
+        v_fld = np.empty(nlvl*model_obj.getpoints()).reshape((nlvl, model_obj.getnlat(), model_obj.getnlon()))
         v_fld.fill(np.nan)
 
-        if config["levels"][0] > config["levels"][1]:
-            steps *= -1
-        elif config["levels"][0] == config["levels"][1]:
-            print("Wrong levels in config.yml!")
-            exit(0)
-
         lvl_idx = 0
-        for level in range(config["levels"][0], config["levels"][1], steps):
-            u_fld[lvl_idx, :, :] = ut.open_gribfile_multi("U", level, rundate, model_run, fp, path="./iconnest/")
-            v_fld[lvl_idx, :, :] = ut.open_gribfile_multi("V", level, rundate, model_run, fp, path="./iconnest/")
+        pres_levels = model_obj.getlevels()
+        for level in pres_levels:
+            u_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("U", level, rundate, model_run, fp, path="./modeldata/")
+            v_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("V", level, rundate, model_run, fp, path="./modeldata/")
 
             lvl_idx += 1
             if lvl_idx >= nlvl:
                 break
 
         print(np.nanmean(u_fld, axis=(1, 2)))
-        plotlib.basic_plot(cape_fld, u_fld, v_fld, lats, lons, fp, model_run,
+        plotlib.basic_plot(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
                            titel='CAPE', threshold=config["threshold"])
-        plotlib.basic_plot_custarea(cape_fld, u_fld, v_fld, lats, lons, fp, model_run,
+        plotlib.basic_plot_custarea(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
                                     titel='CAPE', threshold=config["threshold"])
-    elif program_mode == "Nixon":
-        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./iconnest/")
-
-        steps = config["steps"]
-        nlvl = int(model.getnlev()/steps)
-        u_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
-        u_fld.fill(np.nan)
-        v_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
-        v_fld.fill(np.nan)
-        h_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
-        h_fld.fill(np.nan)
-        p_fld = np.empty(nlvl*model.getpoints()).reshape((nlvl, model.getnlat(), model.getnlon()))
-        p_fld.fill(np.nan)
-
-        if config["levels"][0] > config["levels"][1]:
-            steps *= -1
-        elif config["levels"][0] == config["levels"][1]:
-            print("Wrong levels in config.yml!")
-            exit(0)
-
-        lvl_idx = 0
-        for level in range(config["levels"][0], config["levels"][1], steps):
-            u_fld[lvl_idx, :, :] = ut.open_gribfile_multi("U", level, rundate, model_run, fp, path="./iconnest/")
-            v_fld[lvl_idx, :, :] = ut.open_gribfile_multi("V", level, rundate, model_run, fp, path="./iconnest/")
-            h_fld[lvl_idx, :, :] = ut.open_gribfile_multi("H", level, rundate, model_run, fp, path="./iconnest/")
-            p_fld[lvl_idx, :, :] = ut.open_gribfile_multi("P", level, rundate, model_run, fp, path="./iconnest/")
-
-            lvl_idx += 1
-            if lvl_idx >= nlvl:
-                break
-
-        print(np.nanmean(p_fld, axis=(1, 2)))
-
-        du = np.subtract(u_fld[30, :, :], u_fld[0, :, :])
-        dv = np.subtract(v_fld[30, :, :], v_fld[0, :, :])
-        dls_fld = np.sqrt(np.add(np.square(du), np.square(dv)))
-        plotlib.nixon_proj(cape_fld, dls_fld, u_fld, v_fld, p_fld, h_fld, lats, lons, fp, model_run, imfmt="png")
     else:
         print("Wrong command line argument")
         exit(-1)
@@ -135,8 +61,8 @@ def main():
     # command line arguments
     parser = argparse.ArgumentParser(description="Hodograph Maps")
     # Add positional argument
-    parser.add_argument('mode', type=str,
-                        help='Mode: Test, Basic, Sounding, or Nixon')
+    parser.add_argument('Model', type=str,
+                        help='Model: ICON, IFS, or GFS')
 
     # Add optional argument
     parser.add_argument('-f', '--field', type=str,
@@ -176,18 +102,27 @@ def main():
     else:
         model_run = args.run
 
-    if args.mode != "Test" and args.mode != "Sounding" and args.mode != "Basic" and args.mode != "Nixon":
-        print("Unknown Mode. Exit program.")
-        exit(0)
+    if args.Model is None:
+        model_obj = model.MODELIFNO("ICON EU", 1377, 657, 0.0625, "pres")
+    elif "ICON" in args.Model:
+        model_obj = model.icon_nest
+    elif args.Model == "IFS":
+        model_obj = model.ifs
+    elif args.Model == "GFS":
+        model_obj = model.gfs
     else:
-        program_mode = args.mode
+        print("Unkown model! Exit.")
+        exit(0)
+
+    # program_mode
+    program_mode = config["program_mode"]
 
     # replace space with underscores
     fieldname = args.field.replace(" ", "_")
 
     print(f"\nDate: {rundate}\n Arguments: {args} \nConfig-File: {config}\n\n")
 
-    run(program_mode, fieldname, rundate, model_run, fp)
+    run(model_obj, program_mode, fieldname, rundate, model_run, fp)
 
 # ---------------------------------------------------------------------------------------------------------------------
 

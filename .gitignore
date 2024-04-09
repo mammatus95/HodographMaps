@@ -16,5 +16,4 @@
 */*.pyc
 */*/*.pyc
 
-src/invariant
-src/iconnest
+src/modeldata
