@@ -7,7 +7,7 @@ name: Codecheck
 
 on:
   push:
-    branches: [ "main", "modellevel", "lint" ]
+    branches: [ "main", "modellevel", "preslevel", "lint" ]
     
 jobs:
   build-linux:
