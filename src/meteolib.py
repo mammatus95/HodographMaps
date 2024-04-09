@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 ################################
 #
-# Meteorology library 
+# Meteorology library
 #
 ################################
 
@@ -15,11 +15,12 @@ ZEROCNK = 273.15        # Zero Celsius in Kelvins
 GRAV = 9.80665          # Gravity
 TOL = 1e-10             # Floating Point Tolerance
 
-def uv2spddir(u,v):
 
-    direction = np.rad2deg(np.arctan2(-u,v))
+def uv2spddir(u, v):
 
-    if type(direction) == np.ndarray:
+    direction = np.rad2deg(np.arctan2(-u, v))
+
+    if isinstance(direction, np.ndarray):
         direction[np.where(direction < 0)] += 360
     else:
         if direction < 0:
@@ -39,6 +40,7 @@ def q_to_mixrat(q):
     """
     return q/(1.0-q)
 
+
 def temp_at_mixrat(w, p):
     """
     Returns the temperature in K of air at the given mixing ratio in g/kg and pressure in hPa
@@ -55,11 +57,11 @@ def temp_at_mixrat(w, p):
     """
 
     # Constants Used
-    c1 = 0.0498646455 ; c2 = 2.4082965 ; c3 = 7.07475
-    c4 = 38.9114 ; c5 = 0.0915 ; c6 = 1.2035
+    c1 = 0.0498646455; c2 = 2.4082965; c3 = 7.07475
+    c4 = 38.9114; c5 = 0.0915; c6 = 1.2035
 
     x = np.log10(w * p / (622. + w))
-    x = (np.power(10.,((c1 * x) + c2)) - c3 + (c4 * np.power((np.power(10,(c5 * x)) - c6),2)))
+    x = (np.power(10., ((c1 * x) + c2)) - c3 + (c4 * np.power((np.power(10, (c5 * x)) - c6), 2)))
     return x
 
 
@@ -92,12 +94,12 @@ def non_parcel_bunkers_motion_experimental(u, v, ps, i_500m, i_5km, i_6km):
 
 
     """
-    d=7.5
+    d = 7.5
 
     # sfc-500m Mean Wind
     mnu500m, mnv500m = mean_wind(u[:i_500m], v[:i_500m], ps[:i_500m])
 
-    ## 5.5km-6.0km Mean Wind
+    # 5.5km-6.0km Mean Wind
     mnu5500m_6000m, mnv5500m_6000m = mean_wind(u[i_5km:i_6km], v[i_5km:i_6km], ps[i_5km:i_6km])
 
     # shear vector of the two mean winds
@@ -105,7 +107,7 @@ def non_parcel_bunkers_motion_experimental(u, v, ps, i_500m, i_5km, i_6km):
     shrv = mnv5500m_6000m - mnv500m
 
     # SFC-6km Mean Wind
-    mnu6, mnv6 =  mean_wind(u[:i_6km], v[:i_6km], ps[:i_6km])
+    mnu6, mnv6 = mean_wind(u[:i_6km], v[:i_6km], ps[:i_6km])
 
     # Bunkers Right Motion
     tmp = d / np.sqrt(shru*shru + shrv*shrv)

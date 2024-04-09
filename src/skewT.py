@@ -2,7 +2,7 @@ from matplotlib.axes import Axes
 import matplotlib.transforms as transforms
 import matplotlib.axis as maxis
 import matplotlib.spines as mspines
-from matplotlib.projections import register_projection
+# from matplotlib.projections import register_projection
 
 
 # The sole purpose of this class is to look at the upper, lower, or total
