@@ -130,6 +130,7 @@ def run(program_mode, fieldname, rundate, model_run, fp):
 
 def main():
     config = ut.load_yaml('config.yml')
+    run_config = ut.load_yaml('run.yml')
 
     # command line arguments
     parser = argparse.ArgumentParser(description="Hodograph Maps")
@@ -161,21 +162,21 @@ def main():
         exit(-1)
 
     if args.date is None:
-        rundate = datetime.strptime(config["default_date"], "%Y-%m-%d")
+        rundate = datetime.strptime(run_config["default_date"], "%Y-%m-%d")
     else:
         rundate = datetime.strptime(args.date, "%Y-%m-%d")
 
     if args.fp is None:
-        fp = config["fp"]
+        fp = run_config["fp"]
     else:
         fp = args.fp
 
     if args.run is None:
-        model_run = config["run"]
+        model_run = run_config["run"]
     else:
         model_run = args.run
 
-    if args.mode != "Test" or args.mode != "Sounding" or args.mode != "Basic" or args.mode != "Nixon":
+    if args.mode != "Test" and args.mode != "Sounding" and args.mode != "Basic" and args.mode != "Nixon":
         print("Unknown Mode. Exit program.")
         exit(0)
     else:

@@ -10,14 +10,15 @@ conda env create -f environment.yml
 conda activate HodographMaps
 ```
 
+You need to addg Conda initialization to your etc/profile, as well.
 
 ## Example Image
 
 ![Example](images/example.png)
 
-![Map of Hodographs](images/hodographmap_ce_9.png)
+![Map of Hodographs](images/hodographmap_area.png)
 
-![Map of Soundings](images/soundingmap_ce_9.png)
+![Map of Soundings](images/soundingmap_example.png)
 
 
 ## How to run
@@ -32,6 +33,8 @@ python3 main.py Basic
 
 # Plot Soundings
 python3 main.py Sounding
+
+cd images
 ```
 
 ## Cartopy?
@@ -42,6 +45,7 @@ python3 main.py Sounding
 ## Datasource
 - ICON Nest: https://opendata.dwd.de/weather/nwp/icon-eu/
 - IFS: https://www.ecmwf.int/en/forecasts/datasets/open-data
+- GFS: https://www.nco.ncep.noaa.gov/pmb/products/gfs/
 
 ## License
 

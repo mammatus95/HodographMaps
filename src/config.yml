@@ -1,7 +1,3 @@
-run: 0
-fp: 36
-default_date: "2024-04-08"
-
 levels: [74,20]
 steps: 1  # level steps
 
