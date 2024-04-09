@@ -80,8 +80,10 @@ def run(program_mode, fieldname, rundate, model_run, fp):
                 break
 
         print(np.nanmean(u_fld, axis=(1, 2)))
-        plotlib.basic_plot(cape_fld, u_fld, v_fld, lats, lons, fp, model_run, titel='CAPE', threshold=config["threshold"])
-        plotlib.basic_plot_custarea(cape_fld, u_fld, v_fld, lats, lons, fp, model_run, titel='CAPE', threshold=config["threshold"])
+        plotlib.basic_plot(cape_fld, u_fld, v_fld, lats, lons, fp, model_run,
+                           titel='CAPE', threshold=config["threshold"])
+        plotlib.basic_plot_custarea(cape_fld, u_fld, v_fld, lats, lons, fp, model_run,
+                                    titel='CAPE', threshold=config["threshold"])
     elif program_mode == "Nixon":
         cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./iconnest/")
 

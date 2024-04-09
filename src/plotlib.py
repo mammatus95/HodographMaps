@@ -296,7 +296,7 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
 
     # draw part of second cricle
     if np.max(spd[:-20]) > 28:
-        ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20] > 25)])-np.pi/8, 
+        ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20] > 25)])-np.pi/8,
                              np.mean(wdir[np.where(spd[:-20] > 25)])+np.pi/8, 100),
                  np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
