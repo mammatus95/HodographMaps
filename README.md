@@ -42,3 +42,7 @@ python3 main.py Sounding
 ## Datasource
 - ICON Nest: https://opendata.dwd.de/weather/nwp/icon-eu/
 - IFS: https://www.ecmwf.int/en/forecasts/datasets/open-data
+
+## License
+
+This project is licensed under the terms of the MIT license. See the [LICENSE](LICENSE) file for details.
