@@ -20,7 +20,7 @@ states_provinces = cfeature.NaturalEarthFeature(
 # own moduls
 import utilitylib as ut
 import meteolib as met
-from skewT import *
+from skewT import SkewXAxes
 
 # ---------------------------------------------------------------------------------------------------------------------
 # create plot class
@@ -31,6 +31,7 @@ from skewT import *
 config = ut.load_yaml('config.yml')
 fontsize = config["fontsize"]
 titlesize = config["titlesize"]
+
 
 def eu_merc(hour, start, projection=crs.Mercator(), factor=3):
     fig, ax = plt.subplots(figsize=(3*factor, 3.5091*factor), subplot_kw=dict(projection=projection))
@@ -98,6 +99,7 @@ def alps(hour, start, projection=crs.EuroPP(), lon1=5.8, lon2=17.8, lat1=45.23, 
     plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=fontsize)
     return fig, ax
 
+
 def two_plots(projection=crs.EuroPP(), lon1=3.56, lon2=16.5, lat1=46.2, lat2=55.6, fac=3):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(5*fac, 3*fac), subplot_kw=dict(projection=projection))
     fig.subplots_adjust(left=0.02, right=0.92, top=0.95, bottom=0.05, wspace=0.14)
@@ -110,18 +112,18 @@ def two_plots(projection=crs.EuroPP(), lon1=3.56, lon2=16.5, lat1=46.2, lat2=55.
     plt.annotate("ICON Nest (DWD)", xy=(0.6, -0.03), xycoords='axes fraction', fontsize=fontsize)
     return fig, ax1, ax2
 
-# ---------------------------------------------------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------------------------------------------------
 # create colormap for CAPE field
 clevs = np.array([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
                   1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000])
 cmap = LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
-cmap2= LinearSegmentedColormap.from_list("", ["gold", "orange", "darkorange", "red", "darkred", "darkmagenta"])
+cmap2 = LinearSegmentedColormap.from_list("", ["gold", "orange", "darkorange", "red", "darkred", "darkmagenta"])
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def test_plot (cape_fld, lats, lons, hour, run, titel='CAPE'):
+def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
     """
     Parameters:
     ------------
@@ -140,8 +142,8 @@ def test_plot (cape_fld, lats, lons, hour, run, titel='CAPE'):
     plt.title(titel, fontsize=titlesize)
 
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(),
-                     cmap=cmap, extend = 'max', alpha=0.4, antialiased=True)
-    
+                     cmap=cmap, extend='max', alpha=0.4, antialiased=True)
+
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
@@ -150,6 +152,7 @@ def test_plot (cape_fld, lats, lons, hour, run, titel='CAPE'):
     plt.close()
 
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 def soundingpoint(point, temp, q, pres, ax, width=0.1, proj='skewT', smooth=False):
     """
@@ -183,25 +186,26 @@ def soundingpoint(point, temp, q, pres, ax, width=0.1, proj='skewT', smooth=Fals
     # ax2.set_ylim(0, )
 
     # 10 ms circle
-    #ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
+    # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
     # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
     # calculate dewpoint
     pres /= 100
-    dewpoint = met.temp_at_mixrat( met.q_to_mixrat(q)*1000.0, pres )
+    dewpoint = met.temp_at_mixrat(met.q_to_mixrat(q)*1000.0, pres)
 
     # smoothing
     if smooth is True:
         temp[1:] = (temp[1:] + temp[:-1])/2
         dewpoint[1:] = (dewpoint[1:] + dewpoint[:-1])/2
-   
+
     ax2.semilogy(temp[:40:1]-met.ZEROCNK, pres[:40:1], 'b-', lw=1.5)
     ax2.semilogy(dewpoint[:40:1]-met.ZEROCNK, pres[:40:1], 'g-', lw=1.5)
-    ax2.vlines(x=0, ymin=300, ymax=1000, colors='purple', ls='--', lw=0.6) # freezing level
-    ax2.set_ylim(1050,300)
-    #ax2.invert_xaxis()
+    ax2.vlines(x=0, ymin=300, ymax=1000, colors='purple', ls='--', lw=0.6)  # freezing level
+    ax2.set_ylim(1050, 300)
+    # ax2.invert_xaxis()
 
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='CAPE', imfmt="png"):
     """
@@ -222,19 +226,16 @@ def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='
     fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
     plt.title(titel, fontsize=titlesize)
 
-    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap2, 
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap2,
                      extend='max', alpha=0.4, antialiased=True)
-    
-    
-
 
     for i in range(275, 415, 10):
         for j in range(420, 670, 15):
             soundingpoint((lons[i, j], lats[i, j]),
-                           np.mean(temp[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                           np.mean(q_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                           np.mean(p_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                           ax, width=0.05)  # , proj=crs.PlateCarree()
+                          np.mean(temp[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
+                          np.mean(q_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
+                          np.mean(p_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
+                          ax, width=0.05)  # , proj=crs.PlateCarree()
 
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
@@ -247,6 +248,7 @@ def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='
     plt.close()
 
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
     """
@@ -262,7 +264,6 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
     --------
     None
     """
-    
     # this takes us from the data coordinates to the display coordinates.
     test = ax.transData.transform(point)
 
@@ -297,7 +298,7 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
     if np.max(spd[:-20]) > 28:
         ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20] > 25)])-np.pi/8,
                              np.mean(wdir[np.where(spd[:-20] > 25)])+np.pi/8, 100),
-                             np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
+                 np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
     ax2.plot(wdir[:10:1], spd[:10:1], 'r-', lw=1.5)
     ax2.plot(wdir[9:21:2], spd[9:21:2], 'g-', lw=1.5)
@@ -326,7 +327,7 @@ def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=
     fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
     plt.title(titel, fontsize=titlesize)
 
-    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap, 
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap,
                      extend='max', alpha=0.4, antialiased=True)
 
     for i in range(275, 415, 10):
@@ -351,9 +352,9 @@ def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=
     name = f"./images/hodographmap_ce_{hour}.{imfmt}"
     plt.savefig(name)
     plt.close()
-    
-def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
 
+
+def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
     lon1 = config["customize"]["lon1"]
     lon2 = config["customize"]["lon2"]
     lat1 = config["customize"]["lat1"]
@@ -361,7 +362,8 @@ def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', t
     fig, ax = customize_area(hour, start, projection=crs.PlateCarree(), lon1=lon1, lon2=lon2, lat1=lat1, lat2=lat2)
     plt.title(titel, fontsize=titlesize)
 
-    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap, extend = 'max', alpha=0.4, antialiased=True)
+    wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(),
+                     cmap=cmap, extend='max', alpha=0.4, antialiased=True)
 
     for i in range(340, 400, 5):
         for j in range(555, 665, 5):
@@ -395,7 +397,7 @@ def nixon_hodograph(point, u, v, p, height, ax, width=0.1, clim=40, proj='polar'
     rstu, rstv : storm motion vector for right mover
     """
 
-    i=0
+    i = 0
     while height[i] < 500:
         i += 1
     i_500m = deepcopy(i)
@@ -409,8 +411,8 @@ def nixon_hodograph(point, u, v, p, height, ax, width=0.1, clim=40, proj='polar'
 
     rstu, rstv, lstu, lstv, mwu6, mwv6 = met.non_parcel_bunkers_motion_experimental(u, v, p, i_500m, i_5km, i_6km)
 
-    u-=rstu
-    v-=rstv
+    u -= rstu
+    v -= rstv
 
     # plot
     test = ax.transData.transform(point)
@@ -442,7 +444,7 @@ def nixon_hodograph(point, u, v, p, height, ax, width=0.1, clim=40, proj='polar'
     ax2.plot(wdir[9:21:2], spd[9:21:2], 'g-', lw=1.5)
     ax2.plot(wdir[19:-20:2], spd[19:-20:2], 'b-', lw=1.5)
     ax2.scatter(0, 0, c="k", s=2, marker='x', alpha=0.75)
-    
+
     theta, mag = met.uv2spddir(rstu, rstv)
     ax2.arrow(theta, 0, 0, mag, head_width=0.1, head_length=0.1)
 
@@ -454,9 +456,8 @@ def nixon_proj(cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start, imfmt=
     dls_fld  : 2D deep layer shear field or brn shear ...
     u, v : wind components
     high : model level high
-    or 
+    or
     rstu, rstv : storm motion vector
-    
     background filed is cape ...
     only hodographs with more the 10 m/s dls
     """
@@ -468,7 +469,7 @@ def nixon_proj(cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start, imfmt=
 
     clevs = np.array([20, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500])
     # clevs = np.array([20, 50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500])
-    cmap = LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])	
+    cmap = LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
 
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(),
                      cmap=cmap, extend='max', alpha=0.4)
@@ -478,10 +479,10 @@ def nixon_proj(cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start, imfmt=
     # cleves = np.array([500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000])
     # cs = plt.contour(lons, lats, wx_fld[:, :], levels=cleves, transform=crs.PlateCarree(), colors='k', linewidths=0.8)
     # plt.clabel(cs, np.array([500, 1000, 2000, 3000]), fontsize=7, inline=1, fmt='%.f') # contour labels
-    
+
     for i in range(280, 410, 10):
         for j in range(420, 670, 15):
-            if np.mean(dls_fld[i-1:i+1, j-1:j+1]) > 10.0 and np.mean(cape_fld[i-1:i+1, j-1:j+1]) > 10.0:#m/s
+            if np.mean(dls_fld[i-1:i+1, j-1:j+1]) > 10.0 and np.mean(cape_fld[i-1:i+1, j-1:j+1]) > 10.0:  # m/s
                 nixon_hodograph((lons[i, j], lats[i, j]),
                                 np.mean(u[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)),
                                 np.mean(v[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)),
@@ -491,7 +492,7 @@ def nixon_proj(cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start, imfmt=
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
     ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    
+
     ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
     ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
     ax.annotate('blue: 20-40 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)

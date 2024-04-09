@@ -9,7 +9,7 @@ import numpy as np
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def datum (h, start):
+def datum(h, start):
     if not isinstance(h, int):
         h = int(h)
 
@@ -23,7 +23,7 @@ def datum (h, start):
     string1 = "Run: " + x.strftime("%d.%m. %H UTC")
     x = datetime.datetime(today.tm_year, today.tm_mon, today.tm_mday, start) + datetime.timedelta(hours=h)
     string2 = x.strftime("%A, %d.%m. %H UTC")
-    
+
     return string1, string2
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -45,15 +45,14 @@ def load_yaml(yaml_file, yaml_path='./'):
 
 
 def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
-
-    opendataserver="https://opendata.dwd.de/weather/nwp/icon-eu/grib"
-    nwp_name=f"icon-eu_europe_regular-lat-lon_single-level_{datum}{run}_{fp:03d}_{fieldname.upper()}.grib2.bz2"
-    url_link=f"{opendataserver}/{run}/{fieldname.lower()}/{nwp_name}"
+    opendataserver = "https://opendata.dwd.de/weather/nwp/icon-eu/grib"
+    nwp_name = f"icon-eu_europe_regular-lat-lon_single-level_{datum}{run}_{fp:03d}_{fieldname.upper()}.grib2.bz2"
+    url_link = f"{opendataserver}/{run}/{fieldname.lower()}/{nwp_name}"
 
     response = requests.get(url_link)
     with open(f"{store_path}/test.grib2.bz2", 'wb') as f:
         f.write(response.content)
-    
+
     print("Download complete.")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -79,6 +78,7 @@ def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./iconnest/"):
     # print("Data shape:", data.shape)
     print("Maximum:", np.nanmax(data))
     return data, lats, lons
+
 
 def open_gribfile_multi(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/"):
     date_string = datetime_obj.strftime("%Y%m%d")
