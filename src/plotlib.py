@@ -112,9 +112,9 @@ def two_plots(projection=crs.EuroPP(), lon1=3.56, lon2=16.5, lat1=46.2, lat2=55.
     plt.annotate("ICON Nest (DWD)", xy=(0.6, -0.03), xycoords='axes fraction', fontsize=fontsize)
     return fig, ax1, ax2
 
+
 # ---------------------------------------------------------------------------------------------------------------------
 # create colormap for CAPE field
-
 clevs = np.array([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
                   1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000])
 cmap = LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
@@ -296,9 +296,9 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
 
     # draw part of second cricle
     if np.max(spd[:-20]) > 28:
-        ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20] > 25)])-np.pi/8,
+        ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20] > 25)])-np.pi/8, 
                              np.mean(wdir[np.where(spd[:-20] > 25)])+np.pi/8, 100),
-                             np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
+                 np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
     ax2.plot(wdir[:10:1], spd[:10:1], 'r-', lw=1.5)
     ax2.plot(wdir[9:21:2], spd[9:21:2], 'g-', lw=1.5)
