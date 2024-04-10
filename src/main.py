@@ -18,38 +18,45 @@ import modelinfolib as model
 def run(model_obj, program_mode, fieldname, rundate, model_run, fp):
     config = ut.load_yaml('config.yml')
     print(model_obj)
-    if program_mode == "Test":
-        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./modeldata/")
-        assert cape_fld.shape == (model_obj.getnlat(), model_obj.getnlon()), "Shape inconsistency"
-        plotlib.test_plot(cape_fld, lats, lons, fp, model_run, titel='CAPE')
-
-    elif program_mode == "Basic":
-        cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./modeldata/")
-
-        nlvl = int(model_obj.getnlev())
-        u_fld = np.empty(nlvl*model_obj.getpoints()).reshape((nlvl, model_obj.getnlat(), model_obj.getnlon()))
-        u_fld.fill(np.nan)
-        v_fld = np.empty(nlvl*model_obj.getpoints()).reshape((nlvl, model_obj.getnlat(), model_obj.getnlon()))
-        v_fld.fill(np.nan)
-
-        lvl_idx = 0
+    if model_obj.getname() == "IFS" or model_obj.getname() == "GFS":
+        cape_fld, u_fld, v_fld, lats, lons = ut.open_gribfile_preslvl(model_obj, rundate, model_run, fp, path="./modeldata/")
         pres_levels = model_obj.getlevels()
-        for level in pres_levels:
-            u_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("U", level, rundate, model_run, fp, path="./modeldata/")
-            v_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("V", level, rundate, model_run, fp, path="./modeldata/")
-
-            lvl_idx += 1
-            if lvl_idx >= nlvl:
-                break
-
         print(np.nanmean(u_fld, axis=(1, 2)))
         plotlib.basic_plot(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
                            titel='CAPE', threshold=config["threshold"])
-        plotlib.basic_plot_custarea(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
-                                    titel='CAPE', threshold=config["threshold"])
     else:
-        print("Wrong command line argument")
-        exit(-1)
+        if program_mode == "Test":
+            cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./modeldata/")
+            assert cape_fld.shape == (model_obj.getnlat(), model_obj.getnlon()), "Shape inconsistency"
+            plotlib.test_plot(cape_fld, lats, lons, fp, model_run, titel='CAPE')
+
+        elif program_mode == "Basic":
+            cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./modeldata/")
+
+            nlvl = int(model_obj.getnlev())
+            u_fld = np.empty(nlvl*model_obj.getpoints()).reshape((nlvl, model_obj.getnlat(), model_obj.getnlon()))
+            u_fld.fill(np.nan)
+            v_fld = np.empty(nlvl*model_obj.getpoints()).reshape((nlvl, model_obj.getnlat(), model_obj.getnlon()))
+            v_fld.fill(np.nan)
+
+            lvl_idx = 0
+            pres_levels = model_obj.getlevels()
+            for level in pres_levels:
+                u_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("U", level, rundate, model_run, fp, path="./modeldata/")
+                v_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("V", level, rundate, model_run, fp, path="./modeldata/")
+
+                lvl_idx += 1
+                if lvl_idx >= nlvl:
+                    break
+
+            print(np.nanmean(u_fld, axis=(1, 2)))
+            plotlib.basic_plot(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
+                               titel='CAPE', threshold=config["threshold"])
+            plotlib.basic_plot_custarea(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
+                                        titel='CAPE', threshold=config["threshold"])
+        else:
+            print("Wrong command line argument")
+            exit(-1)
 
 # ---------------------------------------------------------------------------------------------------------------------
 

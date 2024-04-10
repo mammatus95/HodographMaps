@@ -59,12 +59,15 @@ do
   done
 
   # ifs
-  ifs_file=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p4-beta/oper/${D}$(printf "%02d" "$R")0000-${X}h-oper-fc.grib2
+  ifs_file=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p25/oper/${D}$(printf "%02d" "$R")0000-${X}h-oper-fc.grib2
+  ifs_index=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p25/oper/${D}$(printf "%02d" "$R")0000-${X}h-oper-fc.grib2
   wget ${ifs_file} -P ${store_path}/
+  wget ${ifs_index} -P ${store_path}/
   mv ${store_path}/${D}$(printf "%02d" "$R")0000-${X}h-oper-fc.grib2 ${store_path}/ifs_$(printf "%02d" "$R")z_${D}_f${T}.grib2
-  
+  mv ${store_path}/${D}$(printf "%02d" "$R")0000-${X}h-oper-fc.index ${store_path}/ifs_$(printf "%02d" "$R")z_${D}_f${T}.index
+    
   # gfs
-  gfs_file=${gfs_model_pfad}/gfs.${D}/$(printf "%02d" "$R")/atmos/gfs.t$(printf "%02d" "$R")z.goessimpgrb2.0p25.f${T}
+  gfs_file=${gfs_model_pfad}/gfs.${D}/$(printf "%02d" "$R")/atmos/gfs.t$(printf "%02d" "$R")z.pgrb2.0p25.f${T}
   wget ${gfs_file} -P ${store_path}/
   mv ${store_path}/gfs.t$(printf "%02d" "$R")z.goessimpgrb2.0p25.f${T} ${store_path}/gfs_$(printf "%02d" "$R")z_${D}_f${T}.grib2
   

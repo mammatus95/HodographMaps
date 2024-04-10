@@ -235,9 +235,11 @@ def basic_plot(cape_fld, u, v, pres_levels, lats, lons, hour, start, titel='CAPE
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap,
                      extend='max', alpha=0.4, antialiased=True)
 
-    for i in range(275, 415, 10):
-        for j in range(420, 670, 15):
-            if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > threshold:
+    #for i in range(275, 415, 10):
+    #    for j in range(420, 670, 15):
+    for i in range(142, 176, 4):
+        for j in range(731, 794, 4):
+            if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > 0:
                 hodopoint((lons[i, j], lats[i, j]),
                           np.mean(u[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
                           np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), pres_levels, ax, width=0.1)  # proj=crs.PlateCarree()
@@ -249,9 +251,9 @@ def basic_plot(cape_fld, u, v, pres_levels, lats, lons, hour, start, titel='CAPE
         ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
     else:
         ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue: 20-50 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate('red: srf-850hPa', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green: 850-600hPa', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: above 600hPa', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
     ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
 
     name = f"./images/hodographmap_ce_{hour}.{imfmt}"

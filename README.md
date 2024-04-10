@@ -29,8 +29,9 @@ bash download_script.sh
 conda activate HodographMaps
 
 # Plot Hodograph
-python3 main.py Basic
-
+python3 main.py IFS
+python3 main.py GFS
+python3 main.py ICON
 cd images
 ```
 

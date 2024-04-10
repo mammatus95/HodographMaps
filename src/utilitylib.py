@@ -58,7 +58,7 @@ def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./iconnest/"):
+def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./modeldata/"):
     date_string = datetime_obj.strftime("%Y%m%d")
     nwp_singlelevel = "icon-eu_europe_regular-lat-lon_single-level"
 
@@ -80,7 +80,7 @@ def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./iconnest/"):
     return data, lats, lons
 
 
-def open_icon_gribfile_preslvl(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/"):
+def open_icon_gribfile_preslvl(fieldname, lvl, datetime_obj, run, fp, path="./modeldata/"):
     date_string = datetime_obj.strftime("%Y%m%d")
     nwp_modellevel = "icon-eu_europe_regular-lat-lon_pressure-level"
 
@@ -99,6 +99,47 @@ def open_icon_gribfile_preslvl(fieldname, lvl, datetime_obj, run, fp, path="./ic
     # print("Data shape:", data.shape)
     print("Maximum:", np.nanmax(data))
     return data
+
+def open_gribfile_preslvl(model_obj, datetime_obj, run, fp, path="./modeldata/"):
+    date_string = datetime_obj.strftime("%Y%m%d")
+
+    # create numpy.array fields
+    shape = (model_obj.getnlev(), model_obj.getnlat(), model_obj.getnlon())
+    u_fld = np.full(shape, np.nan)
+    v_fld = np.full(shape, np.nan)
+
+    shape = (model_obj.getnlat(), model_obj.getnlon())
+    cape_fld = np.full(shape, np.nan)
+    lats = np.full(shape, np.nan)
+    lons = np.full(shape, np.nan)
+    pres_levels = model_obj.getlevels()
+
+    # Open the GRIB file
+    # modelname_RRz_YYYYMMDD_f015.grib2
+    gribidx = pygrib.index(f"{path}{model_obj.getname().lower()}_{run:02d}z_{date_string}_f{fp:03d}.grib2",'shortName','typeOfLevel','level')
+    #grbs.seek(0)
+
+
+    for par in model_obj.getParamter():
+        try:
+            grb_message = gribidx.select(shortName=par[0],typeOfLevel=par[1],level=par[2])[0] # takes the matching grib message
+            print(grb_message)
+            if par[0] == "cape":
+                cape_fld = grb_message.values
+                lats, lons = grb_message.latlons()
+            else:
+                idx = pres_levels.index(par[2])
+                if par[0] == 'u':
+                    u_fld[idx, :, :] = grb_message.values
+                elif par[0] == 'v':
+                    v_fld[idx, :, :] = grb_message.values
+                else:
+                    raise ValueError(f"Unknown Parameter: {par[0]}")
+        except ValueError as e:
+            print(f"Error: {e}\t shortName: {par[0]} typeOfLevel: {par[1]} level: {par[2]}")
+            pass
+
+    return cape_fld, u_fld, v_fld, lats, lons
 
 # ---------------------------------------------------------------------------------------------------------------------
 
