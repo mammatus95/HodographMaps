@@ -1,7 +1,9 @@
 # ignore ALL .log files
 
-.ipynb_checkpoints/
-*/.ipynb_checkpoints/
+**__pycache__
+
+**.ipynb_checkpoints/
+
 
 */*.png
 */*/*.png

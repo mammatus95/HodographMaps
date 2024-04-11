@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import datetime
+from datetime import datetime, timedelta
 import requests
 import yaml
 import pygrib
@@ -9,22 +9,20 @@ import numpy as np
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def datum(h, start):
-    if not isinstance(h, int):
-        h = int(h)
+def datum(leadtime, start, datetime_obj):
+    if not isinstance(leadtime, int):
+        leadtime = int(leadtime)
 
     if not isinstance(start, int):
         start = int(start)
 
-    today = datetime.date.today()
-    today = today.timetuple()
-    x = datetime.datetime(today.tm_year, today.tm_mon, today.tm_mday, start)
-    # string = "Forecasttime " + x.strftime("%d.%m. %H:%M") + " UTC "
-    string1 = "Run: " + x.strftime("%d.%m. %H UTC")
-    x = datetime.datetime(today.tm_year, today.tm_mon, today.tm_mday, start) + datetime.timedelta(hours=h)
-    string2 = x.strftime("%A, %d.%m. %H UTC")
+    today = datetime_obj.timetuple()
+    x = datetime(today.tm_year, today.tm_mon, today.tm_mday, start)
+    modelrun_string = "Run: " + x.strftime("%d.%m. %H UTC")
+    x = datetime(today.tm_year, today.tm_mon, today.tm_mday, start) + timedelta(hours=leadtime)
+    valid_string = x.strftime("%A, %d.%m. %H UTC")
 
-    return string1, string2
+    return modelrun_string, valid_string
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -100,8 +98,8 @@ def open_icon_gribfile_preslvl(fieldname, lvl, datetime_obj, run, fp, path="./mo
     print("Maximum:", np.nanmax(data))
     return data
 
-def open_gribfile_preslvl(model_obj, datetime_obj, run, fp, path="./modeldata/"):
-    date_string = datetime_obj.strftime("%Y%m%d")
+def open_gribfile_preslvl(model_obj, fp, path="./modeldata/"):
+    date_string = model_obj.getrundate_as_str("%Y%m%d")
 
     # create numpy.array fields
     shape = (model_obj.getnlev(), model_obj.getnlat(), model_obj.getnlon())
@@ -113,17 +111,17 @@ def open_gribfile_preslvl(model_obj, datetime_obj, run, fp, path="./modeldata/")
     lats = np.full(shape, np.nan)
     lons = np.full(shape, np.nan)
     pres_levels = model_obj.getlevels()
+    run = model_obj.getrun()
 
     # Open the GRIB file
     # modelname_RRz_YYYYMMDD_f015.grib2
-    gribidx = pygrib.index(f"{path}{model_obj.getname().lower()}_{run:02d}z_{date_string}_f{fp:03d}.grib2",'shortName','typeOfLevel','level')
-    #grbs.seek(0)
-
+    gribidx = pygrib.index(f"{path}{model_obj.getname().lower()}_{run:02d}z_{date_string}_f{fp:03d}.grib2",
+                           'shortName', 'typeOfLevel', 'level')
+    # grbs.seek(0)
 
     for par in model_obj.getParamter():
         try:
-            grb_message = gribidx.select(shortName=par[0],typeOfLevel=par[1],level=par[2])[0] # takes the matching grib message
-            print(grb_message)
+            grb_message = gribidx.select(shortName=par[0], typeOfLevel=par[1], level=par[2])[0] # takes the matching grib message
             if par[0] == "cape":
                 cape_fld = grb_message.values
                 lats, lons = grb_message.latlons()

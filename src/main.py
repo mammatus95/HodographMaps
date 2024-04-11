@@ -15,23 +15,29 @@ import modelinfolib as model
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def run(model_obj, program_mode, fieldname, rundate, model_run, fp):
+def run(model_obj, fp):
     config = ut.load_yaml('config.yml')
-    print(model_obj)
+    
     if model_obj.getname() == "IFS" or model_obj.getname() == "GFS":
-        cape_fld, u_fld, v_fld, lats, lons = ut.open_gribfile_preslvl(model_obj, rundate, model_run, fp, path="./modeldata/")
-        pres_levels = model_obj.getlevels()
+        cape_fld, u_fld, v_fld, lats, lons = ut.open_gribfile_preslvl(model_obj, fp, path="./modeldata/")
+        
         print(np.nanmean(u_fld, axis=(1, 2)))
-        plotlib.basic_plot(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
-                           titel='CAPE', threshold=config["threshold"])
+        plotlib.basic_plot(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
+                           threshold=config["threshold"])
     else:
+        # program_mode
+        program_mode = config["program_mode"]
+
+        # replace space with underscores
+        fieldname = "CAPE_ML"  #args.field.replace(" ", "_")
+        rundate = model_obj.getrundate()
         if program_mode == "Test":
-            cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./modeldata/")
+            cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_obj.getrun(), fp, path="./modeldata/")
             assert cape_fld.shape == (model_obj.getnlat(), model_obj.getnlon()), "Shape inconsistency"
-            plotlib.test_plot(cape_fld, lats, lons, fp, model_run, titel='CAPE')
+            plotlib.test_plot(cape_fld, lats, lons, fp, model_obj.getrun(), titel='CAPE')
 
         elif program_mode == "Basic":
-            cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_run, fp, path="./modeldata/")
+            cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_obj.getrun(), fp, path="./modeldata/")
 
             nlvl = int(model_obj.getnlev())
             u_fld = np.empty(nlvl*model_obj.getpoints()).reshape((nlvl, model_obj.getnlat(), model_obj.getnlon()))
@@ -42,18 +48,18 @@ def run(model_obj, program_mode, fieldname, rundate, model_run, fp):
             lvl_idx = 0
             pres_levels = model_obj.getlevels()
             for level in pres_levels:
-                u_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("U", level, rundate, model_run, fp, path="./modeldata/")
-                v_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("V", level, rundate, model_run, fp, path="./modeldata/")
+                u_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("U", level, rundate, model_obj.getrun(), fp, path="./modeldata/")
+                v_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("V", level, rundate, model_obj.getrun(), fp, path="./modeldata/")
 
                 lvl_idx += 1
                 if lvl_idx >= nlvl:
                     break
 
             print(np.nanmean(u_fld, axis=(1, 2)))
-            plotlib.basic_plot(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
-                               titel='CAPE', threshold=config["threshold"])
-            plotlib.basic_plot_custarea(cape_fld, u_fld, v_fld, pres_levels, lats, lons, fp, model_run,
-                                        titel='CAPE', threshold=config["threshold"])
+            plotlib.basic_plot(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
+                               threshold=config["threshold"])
+            plotlib.basic_plot_custarea(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
+                                        threshold=config["threshold"])
         else:
             print("Wrong command line argument")
             exit(-1)
@@ -62,7 +68,6 @@ def run(model_obj, program_mode, fieldname, rundate, model_run, fp):
 
 
 def main():
-    config = ut.load_yaml('config.yml')
     run_config = ut.load_yaml('run.yml')
 
     # command line arguments
@@ -94,21 +99,6 @@ def main():
         print("Unknown field")
         exit(-1)
 
-    if args.date is None:
-        rundate = datetime.strptime(run_config["default_date"], "%Y-%m-%d")
-    else:
-        rundate = datetime.strptime(args.date, "%Y-%m-%d")
-
-    if args.fp is None:
-        fp = run_config["fp"]
-    else:
-        fp = args.fp
-
-    if args.run is None:
-        model_run = run_config["run"]
-    else:
-        model_run = args.run
-
     if args.Model is None:
         model_obj = model.MODELIFNO("ICON EU", 1377, 657, 0.0625, "pres")
     elif "ICON" in args.Model:
@@ -121,15 +111,24 @@ def main():
         print("Unkown model! Exit.")
         exit(0)
 
-    # program_mode
-    program_mode = config["program_mode"]
+    if args.date is None:
+        model_obj.setrundate(datetime.strptime(run_config["default_date"], "%Y-%m-%d"))
+    else:
+        model_obj.setrundate(datetime.strptime(args.date, "%Y-%m-%d"))
 
-    # replace space with underscores
-    fieldname = args.field.replace(" ", "_")
+    if args.fp is None:
+        fp = run_config["fp"]
+    else:
+        fp = args.fp
 
-    print(f"\nDate: {rundate}\n Arguments: {args} \nConfig-File: {config}\n\n")
+    if args.run is None:
+        model_obj.setrun(run_config["run"])
+    else:
+        model_obj.setrun(args.run)
 
-    run(model_obj, program_mode, fieldname, rundate, model_run, fp)
+    print(f"\nArguments: {args}\n{model_obj}")
+
+    run(model_obj, fp)
 
 # ---------------------------------------------------------------------------------------------------------------------
 

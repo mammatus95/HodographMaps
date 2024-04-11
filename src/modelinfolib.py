@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+from datetime import datetime, date
+from utilitylib import load_yaml
+
 """
 # ICON Nest
 points = 904689
@@ -51,8 +54,6 @@ par_list_gfs = [
                ('u', 'isobaricInhPa',  500),
                ('u', 'isobaricInhPa',  400),
                ('u', 'isobaricInhPa',  300),
-               ('u', 'isobaricInhPa',  250),
-               ('u', 'isobaricInhPa',  200),
                ('v', 'isobaricInhPa', 1000),
                ('v', 'isobaricInhPa',  975),
                ('v', 'isobaricInhPa',  950),
@@ -67,8 +68,6 @@ par_list_gfs = [
                ('v', 'isobaricInhPa',  500),
                ('v', 'isobaricInhPa',  400),
                ('v', 'isobaricInhPa',  300),
-               ('v', 'isobaricInhPa',  250),
-               ('v', 'isobaricInhPa',  200),
                ('cape', 'pressureFromGroundLayer', 9000),  # 9000 18000 25500
 # ('cape', 'surface', 0),
 # ('cape', 'pressureFromGroundLayer', 9000),  # 9000 18000 25500
@@ -86,8 +85,6 @@ par_list_ifs = [
                ('u', 'isobaricInhPa',  500),
                ('u', 'isobaricInhPa',  400),
                ('u', 'isobaricInhPa',  300),
-               ('u', 'isobaricInhPa',  250),
-               ('u', 'isobaricInhPa',  200),
                ('v', 'isobaricInhPa', 1000),
                ('v', 'isobaricInhPa',  925),
                ('v', 'isobaricInhPa',  850),
@@ -96,8 +93,6 @@ par_list_ifs = [
                ('v', 'isobaricInhPa',  500),
                ('v', 'isobaricInhPa',  400),
                ('v', 'isobaricInhPa',  300),
-               ('v', 'isobaricInhPa',  250),
-               ('v', 'isobaricInhPa',  200),
                ('cape', 'entireAtmosphere', 0),
 # ('10u',  'heightAboveGround', 10),
 # ('10v', 'heightAboveGround',  10),
@@ -111,31 +106,62 @@ par_list_ifs = [
 class MODELIFNO:
 
     def __init__(self, modelname, nlon, nlat, d_grad, levtyp):
+        config = load_yaml('config.yml')
         self.modelname = modelname
         self.points = nlon*nlat
         self.nlon = nlon
         self.nlat = nlat
         if "ICON" in modelname:
-            self.levels = [1000, 950, 925, 900, 875, 850, 825, 800, 775, 700, 600, 500, 400, 300, 250, 200]
+            self.levels = [1000, 950, 925, 900, 875, 850, 825, 800, 775, 700, 600, 500, 400, 300]
             self.parlist = None
+            self.hodo_interval_lat = range(272, 415, 12)
+            self.hodo_interval_lon = range(420, 670, 15)
         elif modelname == "IFS":
-            self.levels = [1000, 925, 850, 700, 600, 500, 400, 300, 250, 200]
+            self.levels = [1000, 925, 850, 700, 600, 500, 400, 300]
             self.parlist = par_list_ifs
+            self.hodo_interval_lat = range(143, 174, 3)
+            self.hodo_interval_lon = range(731, 794, 3)
         elif modelname == "GFS":
-            self.levels = [1000, 975, 950, 925, 900, 850, 800, 750, 700, 650, 600, 500, 400, 300, 250, 200]
+            self.levels = [1000, 975, 950, 925, 900, 850, 800, 750, 700, 650, 600, 500, 400, 300]
             self.parlist = par_list_gfs
+            self.hodo_interval_lat = range(143, 174, 3)
+            self.hodo_interval_lon = range(11, 74, 3)
         else:
-            self.levels = [1000, 850, 700, 600, 500, 400, 300, 250, 200]
+            self.levels = [1000, 850, 700, 600, 500, 400, 300]
         self.d_grad = d_grad
         self.levtyp = levtyp
+        self.run = -99
+        self.rundate = date.today()
 
     def __str__(self):
         return (
-                f"Model Information: {self.modelname}\nPoints: {self.points}\n"
-                f"Number of Longitudes: {self.nlon}\nNumber of Latitudes: {self.nlat}\n"
+                f"Model Information: {self.modelname}  Run: {self.run} Date: {self.rundate}\n"
+                f"Points: {self.points}\n"
+                f"Number of Longitudes: {self.nlon}\tNumber of Latitudes: {self.nlat}\n"
                 f"Horizontal resolution: {self.d_grad}\n"
                 f"Number of Levels: {len(self.levels)}\tLeveltyps: {self.levtyp}\n"
                )
+
+    def setrun(self, run):
+        if isinstance(run, int):
+            self.run = run
+        else:
+            self.run = int(run)
+
+    def setrundate(self, rundate):
+        if isinstance(rundate, datetime):
+            self.rundate = rundate
+        else:
+            self.rundate = datetime.strptime(rundate, "%Y-%m-%d")
+
+    def getrun(self):
+        return self.run
+
+    def getrundate(self):
+        return self.rundate
+
+    def getrundate_as_str(self, fmt="%Y%m%d"):
+        return self.rundate.strftime(fmt)
 
     def getname(self):
         return self.modelname
@@ -170,8 +196,10 @@ class MODELIFNO:
     def getd_grad(self):
         return self.d_grad
 
+    def create_plottitle(self):
+        return f"Hodographmap of {self.modelname}"
 
 # Example usage:
-icon_nest = MODELIFNO("ICON EU", 1377, 657, 0.0625, "pres")
+icon_nest = MODELIFNO("ICON Nest", 1377, 657, 0.0625, "pres")
 ifs = MODELIFNO("IFS", 1440, 721, 0.25, "pres")
 gfs = MODELIFNO("GFS", 1440, 721, 0.25, "pres")
