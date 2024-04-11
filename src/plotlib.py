@@ -1,6 +1,4 @@
 #!/usr/bin/python3
-from copy import deepcopy
-
 import numpy as np
 
 # matplotlib
@@ -8,7 +6,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap  # ListedColormap, BoundaryNorm,
-from matplotlib.projections import register_projection
 
 # cartopy
 import cartopy.crs as crs
@@ -81,7 +78,6 @@ def customize_area(hour, start, datetime_obj, model_name, projection=crs.EuroPP(
     ax.coastlines('10m', linewidth=1.2)
     ax.add_feature(states_provinces, edgecolor='black')
     string1, string2 = ut.datum(hour, start, datetime_obj)
-    plt.annotate(model_name, xy=(0.02, -0.04), xycoords='axes fraction', fontsize=10)
     plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
     plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
     return fig, ax
@@ -203,7 +199,7 @@ def hodopoint(point, u, v, pres_levels, ax, width=0.1, clim=40, proj='polar', sm
         wdir_mean = met.uv2spddir(u_mean, v_mean)[0]
         ax2.plot(np.linspace(wdir_mean-np.pi/8,
                              wdir_mean+np.pi/8, 100),
-                 np.zeros(100)+30, '-k', alpha=.3, lw=0.8)    
+                 np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
     # plot data
     idx_low = pres_levels.index(850)
     idx_mid = pres_levels.index(600)
@@ -286,15 +282,16 @@ def basic_plot_custarea(model_obj, cape_fld, u, v, lats, lons, hour, threshold=1
                           np.mean(u[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
                           np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), pres_levels, ax, width=0.1)  # proj=crs.PlateCarree()
 
-    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    cax = fig.add_axes([0.44, 0.03, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    
-    ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('red: srf-850hPa', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('green: 850-600hPa', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue: above 600hPa', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
-    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
+    ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate(r'in $J/kg$', xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
+
+    ax.annotate('1000-850 hPa in red', xy=(0.02, -0.03), xycoords='axes fraction', fontsize=13)
+    ax.annotate(' 850-600 hPa in green', xy=(0.02, -0.06), xycoords='axes fraction', fontsize=13)
+    ax.annotate(' 600-250 hPa in blue', xy=(0.02, -0.09), xycoords='axes fraction', fontsize=13)
+    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.11), xycoords='axes fraction', fontsize=13)
 
     name = f"./images/hodographmap_area_{model_name.replace(' ', '_')}_{hour}.{imfmt}"
     plt.savefig(name)

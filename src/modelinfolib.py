@@ -69,12 +69,12 @@ par_list_gfs = [
                ('v', 'isobaricInhPa',  400),
                ('v', 'isobaricInhPa',  300),
                ('cape', 'pressureFromGroundLayer', 9000),  # 9000 18000 25500
-# ('cape', 'surface', 0),
-# ('cape', 'pressureFromGroundLayer', 9000),  # 9000 18000 25500
-# ('10u',  'heightAboveGround', 10),
-# ('10v', 'heightAboveGround',  10),
-# ('100u', 'heightAboveGround', 100),
-# ('100v', 'heightAboveGround', 100),
+               # ('cape', 'surface', 0),
+               # ('cape', 'pressureFromGroundLayer', 9000),  # 9000 18000 25500
+               # ('10u',  'heightAboveGround', 10),
+               # ('10v', 'heightAboveGround',  10),
+               # ('100u', 'heightAboveGround', 100),
+               # ('100v', 'heightAboveGround', 100),
 ]
 par_list_ifs = [
                ('u', 'isobaricInhPa', 1000),
@@ -94,10 +94,10 @@ par_list_ifs = [
                ('v', 'isobaricInhPa',  400),
                ('v', 'isobaricInhPa',  300),
                ('cape', 'entireAtmosphere', 0),
-# ('10u',  'heightAboveGround', 10),
-# ('10v', 'heightAboveGround',  10),
-# ('100u', 'heightAboveGround', 100),
-# ('100v', 'heightAboveGround', 100),
+               # ('10u',  'heightAboveGround', 10),
+               # ('10v', 'heightAboveGround',  10),
+               # ('100u', 'heightAboveGround', 100),
+               # ('100v', 'heightAboveGround', 100),
 ]
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ par_list_ifs = [
 class MODELIFNO:
 
     def __init__(self, modelname, nlon, nlat, d_grad, levtyp):
-        config = load_yaml('config.yml')
+        # config = load_yaml('config.yml')
         self.modelname = modelname
         self.points = nlon*nlat
         self.nlon = nlon
@@ -198,6 +198,7 @@ class MODELIFNO:
 
     def create_plottitle(self):
         return f"Hodographmap of {self.modelname}"
+
 
 # Example usage:
 icon_nest = MODELIFNO("ICON Nest", 1377, 657, 0.0625, "pres")

@@ -12,7 +12,7 @@ import utilitylib as ut
 import plotlib
 import modelinfolib as model
 
-# ---------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
 
 
 def run(model_obj, fp):
@@ -29,7 +29,7 @@ def run(model_obj, fp):
         program_mode = config["program_mode"]
 
         # replace space with underscores
-        fieldname = "CAPE_ML"  #args.field.replace(" ", "_")
+        fieldname = "CAPE_ML"  # args.field.replace(" ", "_")
         rundate = model_obj.getrundate()
         if program_mode == "Test":
             cape_fld, lats, lons = ut.open_gribfile_single(fieldname, rundate, model_obj.getrun(), fp, path="./modeldata/")
@@ -48,8 +48,10 @@ def run(model_obj, fp):
             lvl_idx = 0
             pres_levels = model_obj.getlevels()
             for level in pres_levels:
-                u_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("U", level, rundate, model_obj.getrun(), fp, path="./modeldata/")
-                v_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("V", level, rundate, model_obj.getrun(), fp, path="./modeldata/")
+                u_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("U", level, rundate, model_obj.getrun(),
+                                                                     fp, path="./modeldata/")
+                v_fld[lvl_idx, :, :] = ut.open_icon_gribfile_preslvl("V", level, rundate, model_obj.getrun(),
+                                                                     fp, path="./modeldata/")
 
                 lvl_idx += 1
                 if lvl_idx >= nlvl:
@@ -64,7 +66,7 @@ def run(model_obj, fp):
             print("Wrong command line argument")
             exit(-1)
 
-# ---------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
 
 
 def main():

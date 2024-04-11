@@ -98,6 +98,7 @@ def open_icon_gribfile_preslvl(fieldname, lvl, datetime_obj, run, fp, path="./mo
     print("Maximum:", np.nanmax(data))
     return data
 
+
 def open_gribfile_preslvl(model_obj, fp, path="./modeldata/"):
     date_string = model_obj.getrundate_as_str("%Y%m%d")
 
@@ -121,7 +122,7 @@ def open_gribfile_preslvl(model_obj, fp, path="./modeldata/"):
 
     for par in model_obj.getParamter():
         try:
-            grb_message = gribidx.select(shortName=par[0], typeOfLevel=par[1], level=par[2])[0] # takes the matching grib message
+            grb_message = gribidx.select(shortName=par[0], typeOfLevel=par[1], level=par[2])[0]
             if par[0] == "cape":
                 cape_fld = grb_message.values
                 lats, lons = grb_message.latlons()
