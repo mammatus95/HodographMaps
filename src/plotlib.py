@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap  # ListedColormap, BoundaryNorm,
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap  # BoundaryNorm,
 
 # cartopy
 import cartopy.crs as crs
@@ -112,9 +112,9 @@ def two_plots(projection=crs.EuroPP(), lon1=3.56, lon2=16.5, lat1=46.2, lat2=55.
 # create colormap for CAPE field
 clevs = np.array([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
                   1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000])
-cmap = LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
-cmap2 = LinearSegmentedColormap.from_list("", ["gold", "orange", "darkorange", "red", "darkred", "darkmagenta"])
-
+# cmap = LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
+cmap = LinearSegmentedColormap.from_list("", ["lightgoldenrodyellow", "orange", "red"])
+cmap = ListedColormap(cmap(np.linspace(0, 1, 256))[8:255])
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -126,7 +126,7 @@ def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
     lat        :
     lon        :
     hour       :
-    run      :
+    run        :
 
     Returns:
     --------
@@ -149,7 +149,7 @@ def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def hodopoint(point, u, v, pres_levels, ax, width=0.1, clim=40, proj='polar', smooth=False):
+def hodopoint(point, u, v, pres_levels, ax, width=0.1, clim=50, proj='polar', smooth=False):
     """
     Parameters:
     ------------
@@ -203,9 +203,9 @@ def hodopoint(point, u, v, pres_levels, ax, width=0.1, clim=40, proj='polar', sm
     # plot data
     idx_low = pres_levels.index(850)
     idx_mid = pres_levels.index(600)
-    ax2.plot(wdir[:idx_low+1:1], spd[:idx_low+1:1], 'r-', lw=1.5)
-    ax2.plot(wdir[idx_low:idx_mid+1:1], spd[idx_low:idx_mid+1:1], 'g-', lw=1.5)
-    ax2.plot(wdir[idx_mid:], spd[idx_mid:], 'b-', lw=1.5)
+    ax2.plot(wdir[:idx_low+1:1], spd[:idx_low+1:1], '-', color='darkmagenta', lw=1.5)
+    ax2.plot(wdir[idx_low:idx_mid+1:1], spd[idx_low:idx_mid+1:1], '-', color='navy', lw=1.5)
+    ax2.plot(wdir[idx_mid:], spd[idx_mid:], '-', color='darkgreen', lw=1.5)
     ax2.scatter(0, 0, c="k", s=10, marker='x', alpha=0.75)
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -250,9 +250,9 @@ def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt
     ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
     ax.annotate(r'in $J/kg$', xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
 
-    ax.annotate('1000-850 hPa in red', xy=(0.02, -0.03), xycoords='axes fraction', fontsize=13)
-    ax.annotate(' 850-600 hPa in green', xy=(0.02, -0.06), xycoords='axes fraction', fontsize=13)
-    ax.annotate(' 600-250 hPa in blue', xy=(0.02, -0.09), xycoords='axes fraction', fontsize=13)
+    ax.annotate('1000-850 hPa in magenta', xy=(0.02, -0.03), xycoords='axes fraction', fontsize=13)
+    ax.annotate(' 850-600 hPa in blue', xy=(0.02, -0.06), xycoords='axes fraction', fontsize=13)
+    ax.annotate(' 600-300 hPa in green', xy=(0.02, -0.09), xycoords='axes fraction', fontsize=13)
     ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.12), xycoords='axes fraction', fontsize=13)
 
     name = f"./images/hodographmap_{model_name}_{hour}.{imfmt}"
@@ -288,9 +288,9 @@ def basic_plot_custarea(model_obj, cape_fld, u, v, lats, lons, hour, threshold=1
     ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
     ax.annotate(r'in $J/kg$', xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
 
-    ax.annotate('1000-850 hPa in red', xy=(0.02, -0.03), xycoords='axes fraction', fontsize=13)
-    ax.annotate(' 850-600 hPa in green', xy=(0.02, -0.06), xycoords='axes fraction', fontsize=13)
-    ax.annotate(' 600-250 hPa in blue', xy=(0.02, -0.09), xycoords='axes fraction', fontsize=13)
+    ax.annotate('1000-850 hPa in magenta', xy=(0.02, -0.025), xycoords='axes fraction', fontsize=13)
+    ax.annotate(' 850-600 hPa in blue', xy=(0.02, -0.05), xycoords='axes fraction', fontsize=13)
+    ax.annotate(' 600-300 hPa in green', xy=(0.02, -0.075), xycoords='axes fraction', fontsize=13)
     ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.11), xycoords='axes fraction', fontsize=13)
 
     name = f"./images/hodographmap_area_{model_name.replace(' ', '_')}_{hour}.{imfmt}"

@@ -12,6 +12,8 @@ mkdir -p ./images
 
 # select run
 R=0
+R=15
+
 # Path of the icon nest on the opendata-sever
 icon_model_pfad=https://opendata.dwd.de/weather/nwp/icon-eu/grib/$(printf "%02d" "$R")
 # Path the ifs on the opendata-sever
@@ -21,6 +23,7 @@ gfs_model_pfad=https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod
 
 # date
 D=$(date +"%Y%m%d")
+D=20240415
 
 echo "Run: " ${R}
 echo "Date: " $(date)
@@ -35,7 +38,7 @@ icon_pressure=icon-eu_europe_regular-lat-lon_pressure-level_${D}$(printf "%02d" 
 
 
 
-for X in  15 #9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60
+for X in  3 #9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60
 do
   T=$(printf "%03d" "$X")
   # single level
