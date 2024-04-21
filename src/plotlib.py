@@ -11,8 +11,8 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap  # Boundar
 import cartopy.crs as crs
 import cartopy.feature as cfeature
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-states_provinces = cfeature.NaturalEarthFeature(
-    category='cultural', name='admin_0_boundary_lines_land', scale='10m', facecolor='none')
+states_provinces = cfeature.NaturalEarthFeature(category='cultural', name='admin_0_boundary_lines_land',
+                                                scale='10m', facecolor='none')
 
 # own moduls
 import utilitylib as ut

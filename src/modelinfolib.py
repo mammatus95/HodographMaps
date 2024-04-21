@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 from datetime import datetime, date
-from utilitylib import load_yaml
 
 """
 # ICON Nest
@@ -38,7 +37,7 @@ d_grad = 0.25
 
 """
 # ---------------------------------------------------------------------------------------------------------------------
-#             name    typeOfLevel    level             
+#             name    typeOfLevel    level
 par_list_gfs = [
                ('u', 'isobaricInhPa', 1000),
                ('u', 'isobaricInhPa',  975),

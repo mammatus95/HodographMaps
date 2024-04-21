@@ -17,10 +17,10 @@ import modelinfolib as model
 
 def run(model_obj, fp):
     config = ut.load_yaml('config.yml')
-    
+
     if model_obj.getname() == "IFS" or model_obj.getname() == "GFS":
         cape_fld, u_fld, v_fld, lats, lons = ut.open_gribfile_preslvl(model_obj, fp, path="./modeldata/")
-        
+
         print(np.nanmean(u_fld, axis=(1, 2)))
         plotlib.basic_plot(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
                            threshold=config["threshold"])

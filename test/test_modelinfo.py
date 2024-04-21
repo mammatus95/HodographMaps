@@ -6,6 +6,7 @@ from datetime import datetime
 sys.path.append('../src/')
 from modelinfolib import MODELIFNO
 
+
 class TestMODELIFNO(unittest.TestCase):
     def setUp(self):
         self.icon_nest = MODELIFNO("ICON Nest", 1377, 657, 0.0625, "pres")
@@ -50,6 +51,7 @@ class TestMODELIFNO(unittest.TestCase):
 
     def test_create_plottitle(self):
         self.assertEqual(self.icon_nest.create_plottitle(), "Hodographmap of ICON Nest")
+
 
 if __name__ == '__main__':
     unittest.main()
