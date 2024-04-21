@@ -33,7 +33,7 @@ fontsize = config["fontsize"]
 titlesize = config["titlesize"]
 
 
-def eu_merc(hour, start, projection=crs.Mercator(), factor=3):
+def eu_merc(hour, start, datetime_obj, model_name, projection=crs.Mercator(), factor=3):
     fig, ax = plt.subplots(figsize=(3*factor, 3.5091*factor), subplot_kw=dict(projection=projection))
     ax.set_extent([-10.5, 28.0, 30.5, 67.5])
     # ax.stock_img()
@@ -43,60 +43,59 @@ def eu_merc(hour, start, projection=crs.Mercator(), factor=3):
     gl.ylabels_right = False
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
-    string1, string2 = ut.datum(hour, start)
-    plt.annotate(string1, xy=(0.8, 1), xycoords='axes fraction', fontsize=fontsize)
-    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=fontsize)
-    return fig, ax
-
-
-def eu_states(hour, start, projection=crs.EuroPP()):
-    fig, ax = plt.subplots(figsize=(9, 7), subplot_kw=dict(projection=projection))
-    plt.subplots_adjust(left=0.05, right=0.97, bottom=0.05, top=0.95)
-    ax.set_extent([-9.5, 33.0, 38.5, 58.5])
-    ax.coastlines('50m', linewidth=1.2)
-    ax.add_feature(states_provinces, edgecolor='black')
-    string1, string2 = ut.datum(hour, start)
-    plt.annotate("ICON Nest (DWD)", xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
-    plt.annotate(string1, xy=(0.8, 1), xycoords='axes fraction', fontsize=fontsize)
-    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=fontsize)
-    return fig, ax
-
-
-def ce_states(hour, start, projection=crs.EuroPP(), lon1=1.56, lon2=18.5, lat1=45.1, lat2=56.6):
-    fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
-    plt.subplots_adjust(left=0.05, right=0.99, bottom=0.05, top=0.95)
-    ax.set_extent([lon1, lon2, lat1, lat2])
-    ax.coastlines('10m', linewidth=1.2)
-    ax.add_feature(states_provinces, edgecolor='black')
-    string1, string2 = ut.datum(hour, start)
-    plt.annotate("ICON Nest (DWD)", xy=(0.02, -0.04), xycoords='axes fraction', fontsize=10)
-    plt.annotate(string1, xy=(0.835, 1.02), xycoords='axes fraction', fontsize=fontsize)
-    plt.annotate(string2, xy=(0, 1.02), xycoords='axes fraction', fontsize=fontsize)
-    return fig, ax
-
-
-def customize_area(hour, start, projection=crs.EuroPP(), lon1=10.7, lon2=18, lat1=49.8, lat2=54.8):
-    fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
-    plt.subplots_adjust(left=0.05, right=0.99, bottom=0.1, top=0.95)
-    ax.set_extent([lon1, lon2, lat1, lat2])
-    ax.coastlines('10m', linewidth=1.2)
-    ax.add_feature(states_provinces, edgecolor='black')
-    string1, string2 = ut.datum(hour, start)
-    plt.annotate("ICON Nest (DWD)", xy=(0.02, -0.04), xycoords='axes fraction', fontsize=10)
+    string1, string2 = ut.datum(hour, start, datetime_obj)
+    plt.annotate(model_name, xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
     plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
     plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
     return fig, ax
 
 
-def alps(hour, start, projection=crs.EuroPP(), lon1=5.8, lon2=17.8, lat1=45.23, lat2=49.5):
+def eu_states(hour, start, datetime_obj, model_name, projection=crs.EuroPP()):
+    fig, ax = plt.subplots(figsize=(9, 7), subplot_kw=dict(projection=projection))
+    plt.subplots_adjust(left=0.05, right=0.97, bottom=0.05, top=0.95)
+    ax.set_extent([-9.5, 33.0, 38.5, 58.5])
+    ax.coastlines('50m', linewidth=1.2)
+    ax.add_feature(states_provinces, edgecolor='black')
+    string1, string2 = ut.datum(hour, start, datetime_obj)
+    plt.annotate(model_name, xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
+    plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
+    plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
+    return fig, ax
+
+
+def ce_states(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=1.56, lon2=18.5, lat1=45.1, lat2=56.6):
+    fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
+    plt.subplots_adjust(left=0.05, right=0.99, bottom=0.05, top=0.95)
+    ax.set_extent([lon1, lon2, lat1, lat2])
+    ax.coastlines('10m', linewidth=1.2)
+    ax.add_feature(states_provinces, edgecolor='black')
+    string1, string2 = ut.datum(hour, start, datetime_obj)
+    plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
+    plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
+    return fig, ax
+
+
+def customize_area(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=10.7, lon2=18, lat1=49.8, lat2=54.8):
+    fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
+    plt.subplots_adjust(left=0.05, right=0.99, bottom=0.1, top=0.95)
+    ax.set_extent([lon1, lon2, lat1, lat2])
+    ax.coastlines('10m', linewidth=1.2)
+    ax.add_feature(states_provinces, edgecolor='black')
+    string1, string2 = ut.datum(hour, start, datetime_obj)
+    plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
+    plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
+    return fig, ax
+
+
+def alps(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=5.8, lon2=17.8, lat1=45.23, lat2=49.5):
     fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
     ax.set_extent([lon1, lon2, lat1, lat2])
     ax.coastlines('10m', linewidth=1.2)
     ax.add_feature(states_provinces, edgecolor='black')
-    string1, string2 = ut.datum(hour, start)
+    string1, string2 = ut.datum(hour, start, datetime_obj)
     plt.annotate("ICON Nest (DWD)", xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
-    plt.annotate(string1, xy=(0.8, 1), xycoords='axes fraction', fontsize=fontsize)
-    plt.annotate(string2, xy=(0, 1), xycoords='axes fraction', fontsize=fontsize)
+    plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
+    plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
     return fig, ax
 
 
@@ -123,7 +122,7 @@ cmap2 = LinearSegmentedColormap.from_list("", ["gold", "orange", "darkorange", "
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
+def test_plot(model_obj, cape_fld, lats, lons, hour):
     """
     Parameters:
     ------------
@@ -137,9 +136,11 @@ def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
     --------
     None
     """
+    model_name = model_obj.getname()
+    start = model_obj.getrun()
 
-    fig, ax = ce_states(hour, run, projection=crs.PlateCarree())
-    plt.title(titel, fontsize=titlesize)
+    fig, ax = ce_states(hour, start, model_obj.getrundate(), projection=crs.PlateCarree())
+    plt.title(model_obj.create_plottitle(), fontsize=titlesize)
 
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(),
                      cmap=cmap, extend='max', alpha=0.4, antialiased=True)
@@ -147,7 +148,7 @@ def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    name = f"test_ce_{hour}.png"
+    name = f"test_{model_name}_{hour}.png"
     plt.savefig(name)
     plt.close()
 
@@ -207,7 +208,7 @@ def soundingpoint(point, temp, q, pres, ax, width=0.1, proj='skewT', smooth=Fals
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='CAPE', imfmt="png"):
+def sounding_plot(model_obj, cape_fld, temp, q_fld, p_fld, lats, lons, hour, imfmt="png"):
     """
     Parameters:
     ------------
@@ -223,8 +224,11 @@ def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='
     None
     """
 
-    fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
-    plt.title(titel, fontsize=titlesize)
+    model_name = model_obj.getname()
+    start = model_obj.getrun()
+
+    fig, ax = ce_states(hour, start, model_obj.getrundate(), projection=crs.PlateCarree())
+    plt.title(model_obj.create_plottitle(), fontsize=titlesize)
 
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap2,
                      extend='max', alpha=0.4, antialiased=True)
@@ -235,7 +239,7 @@ def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='
                           np.mean(temp[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
                           np.mean(q_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
                           np.mean(p_fld[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          ax, width=0.05)  # , proj=crs.PlateCarree()
+                          ax, width=0.05)
 
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
@@ -243,7 +247,7 @@ def sounding_plot(cape_fld, temp, q_fld, p_fld, lats, lons, hour, start, titel='
     ax.annotate('red dot line: freezing level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
     ax.annotate('blue lines: temperature', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
     ax.annotate('green lines: dewpoints', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    name = f"./images/soundingmap_ce_{hour}.{imfmt}"
+    name = f"./images/soundingmap_{model_name}_{hour}.{imfmt}"
     plt.savefig(name)
     plt.close()
 
@@ -286,7 +290,6 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
     ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
     # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
-    # plot data
     wdir, spd = met.uv2spddir(u, v)
 
     # smoothing
@@ -294,10 +297,14 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
         wdir[1:] = (wdir[1:] + wdir[:-1])/2
         spd[1:] = (spd[1:] + spd[:-1])/2
 
+    # plot data
     # draw part of second cricle
     if np.max(spd[:-20]) > 28:
-        ax2.plot(np.linspace(np.mean(wdir[np.where(spd[:-20] > 25)])-np.pi/8,
-                             np.mean(wdir[np.where(spd[:-20] > 25)])+np.pi/8, 100),
+        u_mean = np.mean(u[np.where(spd > 25)])
+        v_mean = np.mean(v[np.where(spd > 25)])
+        wdir_mean = met.uv2spddir(u_mean, v_mean)[0]
+        ax2.plot(np.linspace(wdir_mean-np.pi/8,
+                             wdir_mean+np.pi/8, 100),
                  np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
     ax2.plot(wdir[:10:1], spd[:10:1], 'r-', lw=1.5)
@@ -308,7 +315,7 @@ def hodopoint(point, u, v, ax, width=0.1, clim=40, proj='polar', smooth=False):
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
+def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt="png"):
     """
     Parameters:
     ------------
@@ -323,44 +330,50 @@ def basic_plot(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=
     --------
     None
     """
+    model_name = model_obj.getname()
+    start = model_obj.getrun()
 
-    fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
-    plt.title(titel, fontsize=titlesize)
+    fig, ax = ce_states(hour, start, model_obj.getrundate(), projection=crs.PlateCarree())
+    plt.title(model_obj.create_plottitle(), fontsize=titlesize)
 
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(), cmap=cmap,
                      extend='max', alpha=0.4, antialiased=True)
 
-    for i in range(275, 415, 10):
-        for j in range(420, 670, 15):
+    for i in model_obj.hodo_interval_lat:
+        for j in model_obj.hodo_interval_lon:
             if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > threshold:
                 hodopoint((lons[i, j], lats[i, j]),
                           np.mean(u[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
-                          np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)  # , proj=crs.PlateCarree()
+                          np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)
 
-    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    cax = fig.add_axes([0.44, 0.03, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    if "CAPE" in titel:
-        ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    else:
-        ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue: 20-50 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
-    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
+    ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate(r'in $J/kg$', xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
 
-    name = f"./images/hodographmap_ce_{hour}.{imfmt}"
+    ax.annotate('red: 1-10 model level', xy=(0.02, -0.03), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green: 10-20 model level', xy=(0.02, -0.06), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: 20-50 model level', xy=(0.02, -0.09), xycoords='axes fraction', fontsize=14)
+    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.12), xycoords='axes fraction', fontsize=10)
+
+    name = f"./images/hodographmap_{model_name}_{hour}.{imfmt}"
     plt.savefig(name)
     plt.close()
 
 
-def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', threshold=10., imfmt="png"):
+def basic_plot_custarea(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt="png"):
     lon1 = config["customize"]["lon1"]
     lon2 = config["customize"]["lon2"]
     lat1 = config["customize"]["lat1"]
     lat2 = config["customize"]["lat2"]
-    fig, ax = customize_area(hour, start, projection=crs.PlateCarree(), lon1=lon1, lon2=lon2, lat1=lat1, lat2=lat2)
-    plt.title(titel, fontsize=titlesize)
+
+    model_name = model_obj.getname()
+    start = model_obj.getrun()
+
+    fig, ax = ce_states(hour, start, model_obj.getrundate(),
+                        projection=crs.PlateCarree(), lon1=lon1, lon2=lon2, lat1=lat1, lat2=lat2)
+    plt.title(model_obj.create_plottitle(), fontsize=titlesize)
 
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(),
                      cmap=cmap, extend='max', alpha=0.4, antialiased=True)
@@ -372,19 +385,18 @@ def basic_plot_custarea(cape_fld, u, v, lats, lons, hour, start, titel='CAPE', t
                           np.mean(u[:, i-1:i+1, j-1:j+1], axis=(1, 2)),
                           np.mean(v[:, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1)  # , proj=crs.PlateCarree()
 
-    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    cax = fig.add_axes([0.44, 0.03, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    if "CAPE" in titel:
-        ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    else:
-        ax.annotate(r'$m^2/s^2$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue: 20-50 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
-    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
+    ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate(r'in $J/kg$', xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
 
-    name = f"./images/hodographmap_area_{hour}.{imfmt}"
+    ax.annotate('red: 1-10 model level', xy=(0.02, -0.03), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green: 10-20 model level', xy=(0.02, -0.06), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: 20-50 model level', xy=(0.02, -0.09), xycoords='axes fraction', fontsize=14)
+    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.12), xycoords='axes fraction', fontsize=10)
+
+    name = f"./images/hodographmap_area_{model_name}_{hour}.{imfmt}"
     plt.savefig(name)
     plt.close()
 
@@ -449,7 +461,7 @@ def nixon_hodograph(point, u, v, p, height, ax, width=0.1, clim=40, proj='polar'
     ax2.arrow(theta, 0, 0, mag, head_width=0.1, head_length=0.1)
 
 
-def nixon_proj(cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start, imfmt="png"):
+def nixon_proj(model_obj, cape_fld, dls_fld, u, v, p, high, lats, lons, hour, imfmt="png"):
     """
     Nixon projection
     cape_fld : 2D cape field
@@ -462,10 +474,11 @@ def nixon_proj(cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start, imfmt=
     only hodographs with more the 10 m/s dls
     """
 
-    titel = 'CAPE with Hodographs'
+    model_name = model_obj.getname()
+    start = model_obj.getrun()
 
-    fig, ax = ce_states(hour, start, projection=crs.PlateCarree())
-    plt.title(titel, fontsize=titlesize)
+    fig, ax = ce_states(hour, start, model_obj.getrundate(), projection=crs.PlateCarree())
+    plt.title(model_obj.create_plottitle(), fontsize=titlesize)
 
     clevs = np.array([20, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500])
     # clevs = np.array([20, 50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500])
@@ -489,15 +502,17 @@ def nixon_proj(cape_fld, dls_fld, u, v, p, high, lats, lons, hour, start, imfmt=
                                 np.mean(p[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)),
                                 np.mean(high[::-1, i-1:i+1, j-1:j+1], axis=(1, 2)), ax, width=0.1, proj=crs.PlateCarree())
 
-    cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
+    cax = fig.add_axes([0.44, 0.03, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
-    ax.annotate(r'$J/kg$', xy=(0.65, -0.04), xycoords='axes fraction', fontsize=14)
 
-    ax.annotate('red: 1-10 model level', xy=(0.75, -0.04), xycoords='axes fraction', fontsize=14)
-    ax.annotate('green: 10-20 model level', xy=(0.75, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate('blue: 20-40 model level', xy=(0.75, -0.1), xycoords='axes fraction', fontsize=14)
-    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.07), xycoords='axes fraction', fontsize=10)
+    ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate(r'in $J/kg$', xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
 
-    name = f"./images/nixon_ce_{hour}.{imfmt}"
+    ax.annotate('red: 1-10 model level', xy=(0.02, -0.03), xycoords='axes fraction', fontsize=14)
+    ax.annotate('green: 10-20 model level', xy=(0.02, -0.06), xycoords='axes fraction', fontsize=14)
+    ax.annotate('blue: 20-50 model level', xy=(0.02, -0.09), xycoords='axes fraction', fontsize=14)
+    ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.12), xycoords='axes fraction', fontsize=10)
+
+    name = f"./images/nixon_{model_name}_{hour}.{imfmt}"
     plt.savefig(name)
     plt.close()

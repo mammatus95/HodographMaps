@@ -4,7 +4,7 @@ source /etc/profile
 
 conda activate HodographMaps
 
-store_path=$(pwd)/iconnest
+store_path=$(pwd)/modeldata
 
 # create nwp directory and if not there a output images directory
 mkdir -p ${store_path}
@@ -65,4 +65,4 @@ do
 done
 
 # remove nwp files
-rm -rf ${store_path}
+# rm -rf ${store_path}
