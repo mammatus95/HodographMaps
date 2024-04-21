@@ -21,10 +21,9 @@ def uv2spddir(u, v):
     direction = np.rad2deg(np.arctan2(-u, v))
 
     if isinstance(direction, np.ndarray):
-        direction[np.where(direction < 0)] += 360
+        direction = np.remainder(direction + 360, 360)
     else:
-        if direction < 0:
-            direction += 360
+        direction = (direction + 360) % 360
 
     return (np.deg2rad(direction), np.sqrt(u*u + v*v))
 

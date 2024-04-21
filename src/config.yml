@@ -1,8 +1,6 @@
-levels: [74,20]
-steps: 1  # level steps
+program_mode : Basic # Test Basic
 
 hodomap : True
-soundmap : True
 
 threshold: 0
 
@@ -16,4 +14,3 @@ customize: # east de
   lat1: 50.1
   lat2: 54.8
 
-# 10.77, 18.92, 49.80, 55.06

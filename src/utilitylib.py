@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import datetime
+from datetime import datetime, timedelta
 import requests
 import yaml
 import pygrib
@@ -9,22 +9,20 @@ import numpy as np
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def datum(h, start):
-    if not isinstance(h, int):
-        h = int(h)
+def datum(leadtime, start, datetime_obj):
+    if not isinstance(leadtime, int):
+        leadtime = int(leadtime)
 
     if not isinstance(start, int):
         start = int(start)
 
-    today = datetime.date.today()
-    today = today.timetuple()
-    x = datetime.datetime(today.tm_year, today.tm_mon, today.tm_mday, start)
-    # string = "Forecasttime " + x.strftime("%d.%m. %H:%M") + " UTC "
-    string1 = "Run: " + x.strftime("%d.%m. %H UTC")
-    x = datetime.datetime(today.tm_year, today.tm_mon, today.tm_mday, start) + datetime.timedelta(hours=h)
-    string2 = x.strftime("%A, %d.%m. %H UTC")
+    today = datetime_obj.timetuple()
+    x = datetime(today.tm_year, today.tm_mon, today.tm_mday, start)
+    modelrun_string = "Run: " + x.strftime("%d.%m. %H UTC")
+    x = datetime(today.tm_year, today.tm_mon, today.tm_mday, start) + timedelta(hours=leadtime)
+    valid_string = x.strftime("%A, %d.%m. %H UTC")
 
-    return string1, string2
+    return modelrun_string, valid_string
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -58,7 +56,7 @@ def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./iconnest/"):
+def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./modeldata/"):
     date_string = datetime_obj.strftime("%Y%m%d")
     nwp_singlelevel = "icon-eu_europe_regular-lat-lon_single-level"
 
@@ -80,9 +78,9 @@ def open_gribfile_single(fieldname, datetime_obj, run, fp, path="./iconnest/"):
     return data, lats, lons
 
 
-def open_gribfile_multi(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/"):
+def open_icon_gribfile_preslvl(fieldname, lvl, datetime_obj, run, fp, path="./modeldata/"):
     date_string = datetime_obj.strftime("%Y%m%d")
-    nwp_modellevel = "icon-eu_europe_regular-lat-lon_model-level"
+    nwp_modellevel = "icon-eu_europe_regular-lat-lon_pressure-level"
 
     # Open the GRIB file
     grbs = pygrib.open(f"{path}{nwp_modellevel}_{date_string}{run:02d}_{fp:03d}_{lvl}_{fieldname.upper()}.grib2")
@@ -99,6 +97,48 @@ def open_gribfile_multi(fieldname, lvl, datetime_obj, run, fp, path="./iconnest/
     # print("Data shape:", data.shape)
     print("Maximum:", np.nanmax(data))
     return data
+
+
+def open_gribfile_preslvl(model_obj, fp, path="./modeldata/"):
+    date_string = model_obj.getrundate_as_str("%Y%m%d")
+
+    # create numpy.array fields
+    shape = (model_obj.getnlev(), model_obj.getnlat(), model_obj.getnlon())
+    u_fld = np.full(shape, np.nan)
+    v_fld = np.full(shape, np.nan)
+
+    shape = (model_obj.getnlat(), model_obj.getnlon())
+    cape_fld = np.full(shape, np.nan)
+    lats = np.full(shape, np.nan)
+    lons = np.full(shape, np.nan)
+    pres_levels = model_obj.getlevels()
+    run = model_obj.getrun()
+
+    # Open the GRIB file
+    # modelname_RRz_YYYYMMDD_f015.grib2
+    gribidx = pygrib.index(f"{path}{model_obj.getname().lower()}_{run:02d}z_{date_string}_f{fp:03d}.grib2",
+                           'shortName', 'typeOfLevel', 'level')
+    # grbs.seek(0)
+
+    for par in model_obj.getParamter():
+        try:
+            grb_message = gribidx.select(shortName=par[0], typeOfLevel=par[1], level=par[2])[0]
+            if par[0] == "cape":
+                cape_fld = grb_message.values
+                lats, lons = grb_message.latlons()
+            else:
+                idx = pres_levels.index(par[2])
+                if par[0] == 'u':
+                    u_fld[idx, :, :] = grb_message.values
+                elif par[0] == 'v':
+                    v_fld[idx, :, :] = grb_message.values
+                else:
+                    raise ValueError(f"Unknown Parameter: {par[0]}")
+        except ValueError as e:
+            print(f"Error: {e}\t shortName: {par[0]} typeOfLevel: {par[1]} level: {par[2]}")
+            pass
+
+    return cape_fld, u_fld, v_fld, lats, lons
 
 # ---------------------------------------------------------------------------------------------------------------------
 
