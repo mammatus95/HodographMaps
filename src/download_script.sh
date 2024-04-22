@@ -12,7 +12,6 @@ mkdir -p ./images
 
 # select run
 R=0
-R=15
 
 # Path of the icon nest on the opendata-sever
 icon_model_pfad=https://opendata.dwd.de/weather/nwp/icon-eu/grib/$(printf "%02d" "$R")
@@ -23,7 +22,6 @@ gfs_model_pfad=https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod
 
 # date
 D=$(date +"%Y%m%d")
-D=20240415
 
 echo "Run: " ${R}
 echo "Date: " $(date)
@@ -87,4 +85,4 @@ do
 done
 
 # remove nwp files
-#rm -rf ${store_path}
+rm -rf ${store_path}

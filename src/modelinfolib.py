@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 from datetime import datetime, date
+import pygrib
+import numpy as np
+import utilitylib as ut
 
 """
 # ICON Nest
@@ -34,7 +37,6 @@ lonmax = 359
 latmin = -90
 latmax = 90
 d_grad = 0.25
-
 """
 # ---------------------------------------------------------------------------------------------------------------------
 #             name    typeOfLevel    level
@@ -105,7 +107,8 @@ par_list_ifs = [
 class MODELIFNO:
 
     def __init__(self, modelname, nlon, nlat, d_grad, levtyp):
-        # config = load_yaml('config.yml')
+        config = ut.load_yaml('config.yml')
+        self.debug_flag = config['debugflag']
         self.modelname = modelname
         self.points = nlon*nlat
         self.nlon = nlon
@@ -153,6 +156,9 @@ class MODELIFNO:
         else:
             self.rundate = datetime.strptime(rundate, "%Y-%m-%d")
 
+    def getdebug(self):
+        return self.debug_flag
+
     def getrun(self):
         return self.run
 
@@ -197,6 +203,98 @@ class MODELIFNO:
 
     def create_plottitle(self):
         return f"Hodographmap of {self.modelname}"
+    # ------------------------------------------------------------------------------------------------------------------------
+
+    def open_gribfile_preslvl(self, fp, path="./modeldata/"):
+        date_string = self.getrundate_as_str("%Y%m%d")
+
+        # create numpy.array fields
+        shape = (self.getnlev(), self.getnlat(), self.getnlon())
+        u_fld = np.full(shape, np.nan)
+        v_fld = np.full(shape, np.nan)
+
+        shape = (self.getnlat(), self.getnlon())
+        cape_fld = np.full(shape, np.nan)
+        lats = np.full(shape, np.nan)
+        lons = np.full(shape, np.nan)
+        pres_levels = self.getlevels()
+        run = self.getrun()
+
+        # Open the GRIB file
+        # modelname_RRz_YYYYMMDD_f015.grib2
+        gribidx = pygrib.index(f"{path}{self.getname().lower()}_{run:02d}z_{date_string}_f{fp:03d}.grib2",
+                            'shortName', 'typeOfLevel', 'level')
+        # grbs.seek(0)
+
+        for par in self.getParamter():
+            try:
+                grb_message = gribidx.select(shortName=par[0], typeOfLevel=par[1], level=par[2])[0]
+                if par[0] == "cape":
+                    cape_fld = grb_message.values
+                    lats, lons = grb_message.latlons()
+                else:
+                    idx = pres_levels.index(par[2])
+                    if par[0] == 'u':
+                        u_fld[idx, :, :] = grb_message.values
+                        if self.debug_flag is True:
+                            print(f"Lvl: {par[2]:>4d} u_max: {np.nanmax(u_fld):.1f}")
+                    elif par[0] == 'v':
+                        v_fld[idx, :, :] = grb_message.values
+                    else:
+                        raise ValueError(f"Unknown Parameter: {par[0]}")
+            except ValueError as e:
+                print(f"Error: {e}\t shortName: {par[0]} typeOfLevel: {par[1]} level: {par[2]}")
+                pass
+        if self.debug_flag is True:
+            print(f"Shape: {np.shape(cape_fld)}")
+        return cape_fld, u_fld, v_fld, lats, lons
+
+    def open_icon_gribfile_preslvl(self, fieldname, lvl, fp, path="./modeldata/"):
+        date_string = self.getrundate_as_str("%Y%m%d")
+        nwp_modellevel = "icon-eu_europe_regular-lat-lon_pressure-level"
+        shape = (self.getnlat(), self.getnlon())
+        data_fld = np.full(shape, np.nan)
+        # Open the GRIB file
+        grbs = pygrib.open(f"{path}{nwp_modellevel}_{date_string}{self.getrun():02d}"
+                           f"_{fp:03d}_{lvl}_{fieldname.upper()}.grib2")
+
+        # Read specific data from the file
+        first_message = grbs[1]
+
+        data_fld = first_message.values
+        # Convert missing values to NaNs
+        data_fld[data_fld == first_message.missingValue] = np.nan
+
+        grbs.close()
+
+        if self.debug_flag is True:
+            # print("Data shape:", data.shape)
+            print(f"Lvl: {lvl:>4d} {fieldname}_max: {np.nanmax(data_fld):.1f}")
+        return data_fld
+
+    def open_icon_gribfile_single(self, fieldname, fp, path="./modeldata/"):
+        date_string = self.getrundate_as_str("%Y%m%d")
+        nwp_singlelevel = "icon-eu_europe_regular-lat-lon_single-level"
+        shape = (self.getnlat(), self.getnlon())
+        cape_fld = np.full(shape, np.nan)
+
+        # Open the GRIB file
+        grbs = pygrib.open(f"{path}{nwp_singlelevel}_{date_string}{self.getrun():02d}_{fp:03d}_{fieldname.upper()}.grib2")
+
+        # Read specific data from the file
+        first_message = grbs[1]
+
+        cape_fld = first_message.values
+        # Convert missing values to NaNs
+        cape_fld[cape_fld == first_message.missingValue] = np.nan
+
+        lats, lons = first_message.latlons()
+        grbs.close()
+
+        if self.debug_flag is True:
+            # print("Data shape:", data.shape)
+            print(f"{fieldname}_max: {np.nanmax(cape_fld):.1f}")
+        return cape_fld, lats, lons
 
 
 # Example usage:
