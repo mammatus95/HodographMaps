@@ -15,7 +15,7 @@ import modelinfolib as model
 # ---------------------------------------------------------------------------------------------------------------------------
 
 
-def run(model_obj, fp):
+def run_plots(model_obj, fp):
     config = ut.load_yaml('config.yml')
     debug_flag = config['debugflag']
 
@@ -32,7 +32,6 @@ def run(model_obj, fp):
 
         # replace space with underscores
         fieldname = "CAPE_ML"  # args.field.replace(" ", "_")
-        rundate = model_obj.getrundate()
         if program_mode == "Test":
             cape_fld, lats, lons = model_obj.open_icon_gribfile_single(fieldname, fp, path="./modeldata/")
             assert cape_fld.shape == (model_obj.getnlat(), model_obj.getnlon()), "Shape inconsistency"
@@ -99,8 +98,7 @@ def main():
         args.field = "CAPE ML"
 
     if (args.field != "CAPE ML") and (args.field != "CAPE CON") and (args.field != "LPI") and (args.field != "WMAXSHEAR"):
-        print("Unknown field")
-        exit(-1)
+        raise ValueError(f"Unknown input field!\n Only CAPE ML works in the moment. Argument: {args.field}")
 
     if args.Model is None:
         model_obj = model.MODELIFNO("ICON EU", 1377, 657, 0.0625, "pres")
@@ -111,8 +109,7 @@ def main():
     elif args.Model == "GFS":
         model_obj = model.gfs
     else:
-        print("Unkown model! Exit.")
-        exit(0)
+        raise ValueError(f"Got unkown model! Cannot proceed with model {args.Model}")
 
     if args.date is None:
         model_obj.setrundate(datetime.strptime(run_config["default_date"], "%Y-%m-%d"))
@@ -124,14 +121,23 @@ def main():
     else:
         fp = args.fp
 
+    if (fp < 0) or (fp > 240):
+        raise ValueError(f"Got wrong leadtime (fp) : {fp}")
+
     if args.run is None:
         model_obj.setrun(run_config["run"])
     else:
+        run = int(args.run)
+        if run != 0 or run != 6 or run != 12 or run != 18:
+            raise ValueError(f"Got wrong model runtime : {run}")
         model_obj.setrun(args.run)
+
+    if (fp < 0) or (fp > 240):
+        raise ValueError(f"Got wrong leadtime (fp) : {fp}")
 
     print(f"\nArguments: {args}\n{model_obj}")
 
-    run(model_obj, fp)
+    run_plots(model_obj, fp)
 
 # ---------------------------------------------------------------------------------------------------------------------
 

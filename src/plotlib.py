@@ -255,7 +255,7 @@ def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt
     ax.annotate(' 600-300 hPa in green', xy=(0.02, -0.09), xycoords='axes fraction', fontsize=13)
     ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.12), xycoords='axes fraction', fontsize=13)
 
-    name = f"./images/hodographmap_{model_name}_{hour}.{imfmt}"
+    name = f"./images/hodographmap_{model_name.replace(' ', '_')}_{hour}.{imfmt}"
     plt.savefig(name)
     plt.close()
 
@@ -294,5 +294,8 @@ def basic_plot_custarea(model_obj, cape_fld, u, v, lats, lons, hour, threshold=1
     ax.annotate("grey circles are 10 and 30m/s", xy=(0.02, -0.11), xycoords='axes fraction', fontsize=13)
 
     name = f"./images/hodographmap_area_{model_name.replace(' ', '_')}_{hour}.{imfmt}"
-    plt.savefig(name)
+    if imfmt == "png":
+        plt.savefig(name, dpi=800)
+    else:
+        plt.savefig(name)
     plt.close()
