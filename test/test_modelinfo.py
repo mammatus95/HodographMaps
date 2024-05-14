@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-import sys
 import unittest
 from datetime import datetime
 # project moduls
-sys.path.append('../src/')
 from modelinfolib import MODELIFNO
 
 
