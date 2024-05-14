@@ -2,7 +2,7 @@
 import unittest
 from datetime import datetime
 # project moduls
-from modelinfolib import MODELIFNO
+from src.modelinfolib import MODELIFNO
 
 
 class TestMODELIFNO(unittest.TestCase):
