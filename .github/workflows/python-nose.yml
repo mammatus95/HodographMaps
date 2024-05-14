@@ -2,7 +2,7 @@ name: Unittest
 
 on:
   push:
-    branches: [ "main", "modellevel", "preslevel" ]
+    branches: [ "main", "unittest"]
     
 jobs:
   build-linux:
