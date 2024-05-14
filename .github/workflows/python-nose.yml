@@ -24,5 +24,7 @@ jobs:
     - name: Run tests with nose2
       run: |
         echo "Pythonpath: " $PYTHONPATH
+        PYTHONPATH=$GITHUB_WORKSPACE
+        echo "Pythonpath: " $PYTHONPATH
         cd test
         nose2
