@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+  stages {
+    stage('Install pip') {
+      steps {
+        //sh 'wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | gpg --dearmor | sudo tee /usr/share/keyrings/jenkins-archive-keyring.gpg > /dev/null'
+        sh 'sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5BA31D57EF5975CA'
+        sh 'apt-get update && apt-get install -y python3-pip'
+      }
+    }
+    stage('Install Requirements') {
+      steps {
+        sh 'pip3 install --upgrade pip' // sh means bash
+        sh 'pip3 install -r requirements.txt'
+      }
+    }
+    stage('version') {
+      steps {
+        sh 'python3 --version'
+      }
+    }
+    stage('Run nose2') {
+      steps {
+        sh 'export PYTHONPATH=$(pwd) && cd $(pwd)/test && nose2'
+      }
+    }
+  // Add more stages as needed
+  }
+}

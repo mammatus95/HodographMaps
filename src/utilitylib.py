@@ -25,7 +25,7 @@ def datum(leadtime, start, datetime_obj):
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def load_yaml(yaml_file, yaml_path='./'):
+def load_yaml(yaml_file, yaml_path='.'):
     """
     Parameters:
     -----------

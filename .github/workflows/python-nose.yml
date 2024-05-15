@@ -1,8 +1,6 @@
 name: Unittest
 
-on:
-  push:
-    branches: [ "main", "modellevel", "preslevel" ]
+on: [push, pull_request_target, issues]
     
 jobs:
   build-linux:
