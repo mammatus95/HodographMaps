@@ -1,10 +1,23 @@
 pipeline {
   agent any
   stages {
+    stage('Install Requirements') {
+      steps {
+        sh 'pip3 install --upgrade pip' // sh means bash
+        sh 'pip3 install -r requirements.txt'
+      }
+    }
     stage('version') {
       steps {
         sh 'python3 --version'
       }
     }
+    stage('Run nose2') {
+      steps {
+        sh 'cd test'
+        sh 'nose2'
+      }
+    }
+  // Add more stages as needed
   }
 }
