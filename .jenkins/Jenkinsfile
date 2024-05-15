@@ -3,6 +3,7 @@ pipeline {
   stages {
     stage('Install pip') {
       steps {
+        sh 'wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -'
         sh 'apt-get update && apt-get install -y python3-pip'
       }
     }
