@@ -21,8 +21,9 @@ pipeline {
     }
     stage('Run nose2') {
       steps {
+        sh 'ls'
         sh 'echo $(pwd)'
-        sh 'cd test'
+        sh 'cd $(pwd)/test'
         sh 'echo $(pwd)'
         sh 'nose2'
       }
