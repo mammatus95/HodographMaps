@@ -3,7 +3,8 @@ pipeline {
   stages {
     stage('Install pip') {
       steps {
-        sh 'wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | gpg --dearmor | sudo tee /usr/share/keyrings/jenkins-archive-keyring.gpg > /dev/null'
+        //sh 'wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | gpg --dearmor | sudo tee /usr/share/keyrings/jenkins-archive-keyring.gpg > /dev/null'
+        sh 'sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5BA31D57EF5975CA'
         sh 'apt-get update && apt-get install -y python3-pip'
       }
     }
