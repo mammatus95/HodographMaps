@@ -24,7 +24,7 @@ pipeline {
         sh 'ls'
         sh 'echo $(pwd)'
         sh 'cd $(pwd)/test'
-        sh 'echo $(pwd)'
+        sh 'ls'
         sh 'nose2'
       }
     }
