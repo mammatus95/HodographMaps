@@ -23,6 +23,7 @@ pipeline {
       steps {
         sh 'echo $(pwd)'
         sh 'cd test'
+        sh 'echo $(pwd)'
         sh 'nose2'
       }
     }
