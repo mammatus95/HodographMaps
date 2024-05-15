@@ -2,12 +2,12 @@
 import unittest
 from datetime import datetime
 # project moduls
-from src.modelinfolib import MODELIFNO
+from src.modelinfolib import MODELINFO
 
 
 class TestMODELIFNO(unittest.TestCase):
     def setUp(self):
-        self.icon_nest = MODELIFNO("ICON Nest", 1377, 657, 0.0625, "pres")
+        self.icon_nest = MODELINFO("ICON Nest", 1377, 657, 0.0625, "pres")
 
     def test_setrun(self):
         run = "15"

@@ -1,25 +1,24 @@
 #!/bin/bash
 
-# run
-# conda activate HodographMaps
-# first!
 
 # change configuration here
 R=0 # select run 0 or 12z
 D=$(date +"%Y%m%d") # date in format YYYYMMDD
 #D=20240502 # date in format YYYYMMDD
 
-echo "Hodograph Maps"
+echo "Hodograph Maps Download Script"
 echo "Script configurations:"
 echo "Model run: " ${R}
-echo "Date: " ${D}
-echo "Today Date: " $(date)
+echo "Config Date: " ${D}
+echo "Today Date : " $(date +"%Y%m%d")
 echo "--------------------------------"
 
 #######################################################################
 # load bash profile
 source /etc/profile
 
+#######################################################################
+cd src
 store_path=$(pwd)/modeldata
 
 # create nwp directory and if not there a output images directory
@@ -42,10 +41,11 @@ icon_pressure=icon-eu_europe_regular-lat-lon_pressure-level_${D}$(printf "%02d" 
 
 
 
-for fp in 15 #9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60
+for fp in 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60
 do
   T=$(printf "%03d" "$fp")
   echo "Start downloading leadtime ${T}h" 
+  # ICON
   # single level
   for N in CAPE_ML CAPE_CON PS
   do
@@ -78,24 +78,8 @@ do
   gfs_file=${gfs_model_pfad}/gfs.${D}/$(printf "%02d" "$R")/atmos/gfs.t$(printf "%02d" "$R")z.pgrb2.0p25.f${T}
   wget ${gfs_file} -P ${store_path}/ >> log.txt 2>&1
   mv ${store_path}/gfs.t$(printf "%02d" "$R")z.pgrb2.0p25.f${T} ${store_path}/gfs_$(printf "%02d" "$R")z_${D}_f${T}.grib2
-  # Plot Hodograph
-  # write run.yml configuration
-  echo run: ${R} > run.yml
-  echo fp: ${fp} >> run.yml
-  echo default_date: \"$(date +%Y-%m-%d)\" >> run.yml
 
-  echo "Plot Hodograph Maps"
-  # run python script
-
-  python3 main.py IFS >> log.txt 2>&1
-  python3 main.py GFS >> log.txt 2>&1
-  python3 main.py ICON >> log.txt 2>&1
-
-  echo "done with leadtime ${T}h on $(date)"
-  ls ./images/*${fp}.png
+  echo "download done with leadtime ${T}h on $(date)"
+  ls ./modeldata/*${T}.grib2
 done
 
-
-
-# remove nwp files
-rm -rf ${store_path}

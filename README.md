@@ -24,7 +24,14 @@ You need to addg Conda initialization to your etc/profile, as well.
 ## How to run
 
 ```bash
+# plot Hodographs for leadtime 15
+conda activate HodographMaps
+bash run_script.sh 15
+```
+**Run past days:**
+```bash
 cd src
+nano download_script.sh # change Date
 bash download_script.sh
 conda activate HodographMaps
 
