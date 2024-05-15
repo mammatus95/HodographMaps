@@ -22,7 +22,8 @@ pipeline {
     stage('Run nose2') {
       steps {
         sh 'cd $(pwd)/test && ls'
-        sh 'cd $(pwd)/test && nose2'
+        sh 'echo $PYTHONPATH'
+        sh 'PYTHONPATH=$(pwd) && cd $(pwd)/test && nose2'
       }
     }
   // Add more stages as needed
