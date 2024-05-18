@@ -2,7 +2,7 @@
 from datetime import datetime, date
 import pygrib
 import numpy as np
-import src.utilitylib as ut
+import utilitylib as ut
 
 """
 # ICON Nest
@@ -104,7 +104,7 @@ par_list_ifs = [
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-class MODELIFNO:
+class MODELINFO:
 
     def __init__(self, modelname, nlon, nlat, d_grad, levtyp):
         config = ut.load_yaml('config.yml')
@@ -196,7 +196,7 @@ class MODELIFNO:
         return len(self.levels)
 
     def getlevtyp(self):
-        return self.d_grad
+        return self.levtyp
 
     def getd_grad(self):
         return self.d_grad
@@ -298,6 +298,6 @@ class MODELIFNO:
 
 
 # Example usage:
-icon_nest = MODELIFNO("ICON Nest", 1377, 657, 0.0625, "pres")
-ifs = MODELIFNO("IFS", 1440, 721, 0.25, "pres")
-gfs = MODELIFNO("GFS", 1440, 721, 0.25, "pres")
+icon_nest = MODELINFO("ICON Nest", 1377, 657, 0.0625, "pres")
+ifs = MODELINFO("IFS", 1440, 721, 0.25, "pres")
+gfs = MODELINFO("GFS", 1440, 721, 0.25, "pres")

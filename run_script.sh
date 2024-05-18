@@ -16,18 +16,23 @@ fi
 FP=${1}
 R=0 # select run 0 or 12z
 D=$(date +"%Y%m%d") # date in format YYYYMMDD
+#######################################################################
 
+echo 
+echo 
 echo "Hodograph Maps Run Script"
-echo "Script configurations:"
+echo "Version: 0.1"
+echo 
+echo "Configurations:"
 echo "Model run: ${R}z"
 echo "Leadtime: ${FP}z"
-echo "Config Date: " ${D}
-echo "Today Date: " $(date)
-echo "--------------------------------"
+echo "Today Date: " $(date +"%d.%m.%Y")
+echo 
+echo 
 
 #######################################################################
-# load bash profile
-source /etc/profile
+# load bash profile and add Pythonpath
+#source /etc/profile
 export PYTHONPATH=$(pwd):$PYTHONPATH
 
 #######################################################################
@@ -35,7 +40,7 @@ cd src
 store_path=$(pwd)/modeldata
 
 # rm log
-rm ./log.txt
+rm ./log.txt > /dev/null 2>&1
 
 # create nwp directory and if not there a output images directory
 mkdir -p ${store_path}
@@ -63,34 +68,34 @@ echo "Start downloading leadtime ${T}h"
 # single level
 for N in CAPE_ML CAPE_CON PS
 do
-typeset -l nvar
-nvar=${N}
-wget -q ${icon_model_pfad}/${nvar}/${icon_single}${T}_${N}.grib2.bz2 -P ${store_path} 2>&1 log.txt
-bzip2 -dfq ${store_path}/${icon_single}${T}_${N}.grib2.bz2 >> log.txt 2>&1
+  typeset -l nvar
+  nvar=${N}
+  wget -q ${icon_model_pfad}/${nvar}/${icon_single}${T}_${N}.grib2.bz2 -P ${store_path} 2>&1 log.txt
+  bzip2 -dfq ${store_path}/${icon_single}${T}_${N}.grib2.bz2 >> log.txt 2>&1
 done
 
 for H in 1000 950 925 900 875 850 825 800 775 700 600 500 400 300
 do
-for N in U V
-do
-  typeset -l nvar
-  nvar=${N}
-  wget -q ${icon_model_pfad}/${nvar}/${icon_pressure}${T}_${H}_${N}.grib2.bz2 -P ${store_path} >> log.txt 2>&1
-  bzip2 -dfq ${store_path}/${icon_pressure}${T}_${H}_${N}.grib2.bz2 >> log.txt 2>&1
-done
+  for N in U V
+  do
+    typeset -l nvar
+    nvar=${N}
+    wget -q ${icon_model_pfad}/${nvar}/${icon_pressure}${T}_${H}_${N}.grib2.bz2 -P ${store_path} >> log.txt 2>&1
+    bzip2 -dfq ${store_path}/${icon_pressure}${T}_${H}_${N}.grib2.bz2 >> log.txt 2>&1
+  done
 done
 
 # ifs
 ifs_file=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p25/oper/${D}$(printf "%02d" "$R")0000-${FP}h-oper-fc.grib2
 ifs_index=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p25/oper/${D}$(printf "%02d" "$R")0000-${FP}h-oper-fc.index
-wget ${ifs_file} -P ${store_path}/ >> log.txt 2>&1
-wget ${ifs_index} -P ${store_path}/ >> log.txt 2>&1
+wget -q ${ifs_file} -P ${store_path}/ >> log.txt 2>&1
+wget -q ${ifs_index} -P ${store_path}/ >> log.txt 2>&1
 mv ${store_path}/${D}$(printf "%02d" "$R")0000-${FP}h-oper-fc.grib2 ${store_path}/ifs_$(printf "%02d" "$R")z_${D}_f${T}.grib2
 mv ${store_path}/${D}$(printf "%02d" "$R")0000-${FP}h-oper-fc.index ${store_path}/ifs_$(printf "%02d" "$R")z_${D}_f${T}.index
 
 # gfs
 gfs_file=${gfs_model_pfad}/gfs.${D}/$(printf "%02d" "$R")/atmos/gfs.t$(printf "%02d" "$R")z.pgrb2.0p25.f${T}
-wget ${gfs_file} -P ${store_path}/ >> log.txt 2>&1
+wget -q ${gfs_file} -P ${store_path}/ >> log.txt 2>&1
 mv ${store_path}/gfs.t$(printf "%02d" "$R")z.pgrb2.0p25.f${T} ${store_path}/gfs_$(printf "%02d" "$R")z_${D}_f${T}.grib2
 
 # Plot Hodograph
@@ -101,16 +106,13 @@ echo default_date: \"$(date +%Y-%m-%d)\" >> run.yml
 
 echo "Plot Hodograph Maps"
 # run python script
-
+#which python3
 python3 main.py IFS >> log.txt 2>&1
 python3 main.py GFS >> log.txt 2>&1
 python3 main.py ICON >> log.txt 2>&1
 
 echo "done with leadtime ${T}h on $(date)"
-ls -al ./images/*${FP}.png
-
-
-
+ls -lh ./images/*${FP}.png
 
 # remove nwp files
-rm -rf ${store_path}
+rm -r ${store_path}

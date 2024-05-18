@@ -101,7 +101,7 @@ def main():
         raise ValueError(f"Unknown input field!\n Only CAPE ML works in the moment. Argument: {args.field}")
 
     if args.Model is None:
-        model_obj = model.MODELIFNO("ICON EU", 1377, 657, 0.0625, "pres")
+        model_obj = model.MODELINFO("ICON EU", 1377, 657, 0.0625, "pres")
     elif "ICON" in args.Model:
         model_obj = model.icon_nest
     elif args.Model == "IFS":

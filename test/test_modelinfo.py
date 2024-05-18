@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import unittest
 from datetime import datetime
-# project moduls
+# project modul
 from src.modelinfolib import MODELINFO
 
 
@@ -42,7 +42,7 @@ class TestMODELIFNO(unittest.TestCase):
         self.assertEqual(self.icon_nest.getnlev(), 14)
 
     def test_getlevtyp(self):
-        self.assertEqual(self.icon_nest.getlevtyp(), 0.0625)
+        self.assertEqual(self.icon_nest.getlevtyp(), "pres")
 
     def test_getd_grad(self):
         self.assertEqual(self.icon_nest.getd_grad(), 0.0625)
