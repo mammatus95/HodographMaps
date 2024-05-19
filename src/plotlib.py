@@ -113,7 +113,7 @@ def two_plots(projection=crs.EuroPP(), lon1=3.56, lon2=16.5, lat1=46.2, lat2=55.
 clevs = np.array([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
                   1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000])
 # cmap = LinearSegmentedColormap.from_list("", ["green", "yellow", "orange", "red", "darkred", "darkmagenta"])
-cmap = LinearSegmentedColormap.from_list("", ["yellowgreen", "tan", "orange", "red"])
+cmap = LinearSegmentedColormap.from_list("", ["yellowgreen", "gold", "orange", "red"])
 cmap = ListedColormap(cmap(np.linspace(0, 1, 256))[4:240])
 # ---------------------------------------------------------------------------------------------------------------------
 

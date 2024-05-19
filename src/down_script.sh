@@ -41,9 +41,9 @@ icon_pressure=icon-eu_europe_regular-lat-lon_pressure-level_${D}$(printf "%02d" 
 
 
 
-for fp in 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60
+for FP in 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60
 do
-  T=$(printf "%03d" "$fp")
+  T=$(printf "%03d" "$FP")
   echo "Start downloading leadtime ${T}h" 
   # ICON
   # single level
@@ -67,12 +67,12 @@ do
   done
 
   # ifs
-  ifs_file=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p25/oper/${D}$(printf "%02d" "$R")0000-${fp}h-oper-fc.grib2
-  ifs_index=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p25/oper/${D}$(printf "%02d" "$R")0000-${fp}h-oper-fc.index
+  ifs_file=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p25/oper/${D}$(printf "%02d" "$R")0000-${FP}h-oper-fc.grib2
+  ifs_index=${ifs_model_pfad}/${D}/$(printf "%02d" "$R")z/ifs/0p25/oper/${D}$(printf "%02d" "$R")0000-${FP}h-oper-fc.index
   wget ${ifs_file} -P ${store_path}/ >> log.txt 2>&1
   wget ${ifs_index} -P ${store_path}/ >> log.txt 2>&1
-  mv ${store_path}/${D}$(printf "%02d" "$R")0000-${fp}h-oper-fc.grib2 ${store_path}/ifs_$(printf "%02d" "$R")z_${D}_f${T}.grib2
-  mv ${store_path}/${D}$(printf "%02d" "$R")0000-${fp}h-oper-fc.index ${store_path}/ifs_$(printf "%02d" "$R")z_${D}_f${T}.index
+  mv ${store_path}/${D}$(printf "%02d" "$R")0000-${FP}h-oper-fc.grib2 ${store_path}/ifs_$(printf "%02d" "$R")z_${D}_f${T}.grib2
+  mv ${store_path}/${D}$(printf "%02d" "$R")0000-${FP}h-oper-fc.index ${store_path}/ifs_$(printf "%02d" "$R")z_${D}_f${T}.index
     
   # gfs
   gfs_file=${gfs_model_pfad}/gfs.${D}/$(printf "%02d" "$R")/atmos/gfs.t$(printf "%02d" "$R")z.pgrb2.0p25.f${T}
@@ -81,5 +81,10 @@ do
 
   echo "download done with leadtime ${T}h on $(date)"
   ls ./modeldata/*${T}.grib2
+  
+  # write run.yml configuration
+  echo run: ${R} > run.yml
+  echo fp: ${FP} >> run.yml
+  echo default_date: \"$(date +%Y-%m-%d)\" >> run.yml
 done
 

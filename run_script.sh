@@ -114,5 +114,6 @@ python3 main.py ICON >> log.txt 2>&1
 echo "done with leadtime ${T}h on $(date)"
 ls -lh ./images/*${FP}.png
 
+rm run.yml
 # remove nwp files
 rm -r ${store_path}
