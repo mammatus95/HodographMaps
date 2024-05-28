@@ -223,7 +223,7 @@ class MODELINFO:
         # Open the GRIB file
         # modelname_RRz_YYYYMMDD_f015.grib2
         gribidx = pygrib.index(f"{path}{self.getname().lower()}_{run:02d}z_{date_string}_f{fp:03d}.grib2",
-                            'shortName', 'typeOfLevel', 'level')
+                               'shortName', 'typeOfLevel', 'level')
         # grbs.seek(0)
 
         for par in self.getParamter():
