@@ -60,7 +60,14 @@ def run_plots(model_obj, fp):
                 print(f"u_mean by lvl: {np.nanmean(u_fld, axis=(1, 2))}")
             plotlib.basic_plot(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
                                threshold=config["threshold"])
-            plotlib.basic_plot_custarea(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
+            
+            # Create a 2D array filled with NaNs
+            lpi_fld = np.full(cape_fld.shape, np.nan)
+            if config["lpi"] is True:
+                lpi_fld, _, _ = model_obj.open_icon_gribfile_single("LPI_CON_MAX", fp, path="./modeldata/")
+
+
+            plotlib.basic_plot_custarea(model_obj, cape_fld, lpi_fld, u_fld, v_fld, lats, lons, fp,
                                         threshold=config["threshold"])
         else:
             print("Wrong command line argument")

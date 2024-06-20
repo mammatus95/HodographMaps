@@ -18,7 +18,7 @@ You need to addg Conda initialization to your etc/profile, as well.
 
 ![Map of Hodographs IFS](images/hodographmap_IFS.png)
 
-![Map of Hodographs GFS](images/hodographmap_GFS.png)
+![Map of Hodographs GFS](images/GFS.gif)
 
 
 ## How to run

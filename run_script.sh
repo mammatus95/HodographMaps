@@ -14,7 +14,7 @@ fi
 
 
 FP=${1}
-R=0 # select run 0 or 12z
+R=00 # select run 0 or 12z
 D=$(date +"%Y%m%d") # date in format YYYYMMDD
 #######################################################################
 
@@ -66,7 +66,7 @@ echo "Start downloading leadtime ${T}h"
 
 # ICON
 # single level
-for N in CAPE_ML CAPE_CON PS
+for N in CAPE_ML CAPE_CON PS LPI_CON_MAX
 do
   typeset -l nvar
   nvar=${N}
@@ -107,13 +107,16 @@ echo default_date: \"$(date +%Y-%m-%d)\" >> run.yml
 echo "Plot Hodograph Maps"
 # run python script
 #which python3
+python3 main.py ICON >> log.txt 2>&1
 python3 main.py IFS >> log.txt 2>&1
 python3 main.py GFS >> log.txt 2>&1
-python3 main.py ICON >> log.txt 2>&1
-
-echo "done with leadtime ${T}h on $(date)"
-ls -lh ./images/*${FP}.png
 
 rm run.yml
 # remove nwp files
 rm -r ${store_path}
+
+echo "done with leadtime ${T}h on $(date)"
+cd ..
+mkdir -p ./results_img
+mv ./src/images/*${FP}.png ./results_img
+ls -lh ./results_img/*${FP}.png

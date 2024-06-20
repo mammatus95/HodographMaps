@@ -6,6 +6,8 @@ hodomap : True
 
 threshold: 0
 
+lpi: True
+
 fontsize: 14
 titlesize: 18
 

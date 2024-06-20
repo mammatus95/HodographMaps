@@ -260,7 +260,7 @@ def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt
     plt.close()
 
 
-def basic_plot_custarea(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt="png"):
+def basic_plot_custarea(model_obj, cape_fld, lpi_fld, u, v, lats, lons, hour, threshold=10., imfmt="png"):
     pres_levels = model_obj.getlevels()
     model_name = model_obj.getname()
     start = model_obj.getrun()
@@ -275,6 +275,12 @@ def basic_plot_custarea(model_obj, cape_fld, u, v, lats, lons, hour, threshold=1
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(),
                      cmap=cmap, extend='max', alpha=0.4, antialiased=True)
 
+    # LPI contours
+    lpi_levs = np.array([50, 500])
+    cs = plt.contour(lons, lats, lpi_fld[:,:], levels=lpi_levs, transform=crs.PlateCarree(), colors='darkred', linewidths=1.4)
+    fmt = '%.f'
+    plt.clabel(cs, fontsize=9, inline=1, fmt=fmt)
+
     for i in range(340, 400, 5):
         for j in range(555, 665, 5):
             if np.mean(cape_fld[i-1:i+1, j-1:j+1]) > threshold:
@@ -285,8 +291,9 @@ def basic_plot_custarea(model_obj, cape_fld, u, v, lats, lons, hour, threshold=1
     cax = fig.add_axes([0.44, 0.03, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
-    ax.annotate(r'in $J/kg$', xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
+    ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.03), xycoords='axes fraction', fontsize=14)
+    ax.annotate(r'in $J/kg$', xy=(0.8, -0.06), xycoords='axes fraction', fontsize=14)
+    ax.annotate("LPI (darkred contours)", xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
 
     ax.annotate('1000-850 hPa in magenta', xy=(0.02, -0.025), xycoords='axes fraction', fontsize=13)
     ax.annotate(' 850-600 hPa in blue', xy=(0.02, -0.05), xycoords='axes fraction', fontsize=13)

@@ -6,18 +6,13 @@
 
 **log.txt
 
-*/*.png
-*/*/*.png
+**.png
+**.svg
+**.gif
 
-*/*.svg
-*/*/*.svg
+**.log
+**.pyc
 
-*.log
-*/*.log
-
-*.pyc
-*/*.pyc
-*/*/*.pyc
 
 src/modeldata
 src/run.yml

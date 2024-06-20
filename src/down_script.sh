@@ -47,7 +47,7 @@ do
   echo "Start downloading leadtime ${T}h" 
   # ICON
   # single level
-  for N in CAPE_ML CAPE_CON PS
+  for N in CAPE_ML CAPE_CON PS LPI_CON_MAX
   do
     typeset -l nvar
     nvar=${N}
