@@ -1,0 +1,64 @@
+pipeline {
+  agent any
+  stages {
+    stage('Install pip') {
+      steps {
+        //sh 'wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | gpg --dearmor | sudo tee /usr/share/keyrings/jenkins-archive-keyring.gpg > /dev/null'
+        sh 'sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5BA31D57EF5975CA'
+        sh 'apt-get update && apt-get install -y python3-pip'
+      }
+    }
+    stage('Install Requirements') {
+      steps {
+        sh 'pip3 install --upgrade pip'
+        sh 'pip3 install -r requirements.txt'
+      }
+    }
+    stage('version') {
+      steps {
+        sh 'python3 --version'
+      }
+    }
+    
+    stage('Install imagemagick') {
+      steps {
+        sh 'sudo apt-get install -y imagemagick'
+      }
+    }
+    
+    stage('Compare Images') {
+      steps {
+      sh 'ls -al ./images'
+        script {
+          def img1 = './images/hodographmap_ICON_Nest.png'
+          def img2 = './images/example.png'
+          def diffImg = './diff.png'
+
+          // Compare images using ImageMagick
+          def result = sh(script: "compare -metric AE ${img1} ${img2} ${diffImg} 2>&1", returnStatus: true)
+
+          if (result != 0) {
+              echo "Images are different. Check the diff image: ${diffImg}"
+              //error("Image comparison failed")
+          } else {
+              echo "Images are identical"
+          }
+        }
+      }
+    }
+
+    stage('Run HodographMaps') {
+      steps {
+        sh 'export PYTHONPATH=$(pwd) && echo $PYTHONPATH'
+        sh 'ls -al'
+        sh './run_script.sh 12'
+      }
+    }
+  }
+  post {
+    always {
+      // Archive images and diff for review
+      archiveArtifacts artifacts: './images/hodographmap_ICON_Nest.png, ./images/example.png, ./diff.png', allowEmptyArchive: true
+    }
+  }
+}
