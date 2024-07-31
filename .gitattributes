@@ -1,0 +1,9 @@
+# Normalize line endings
+* text=auto
+
+# Handle binary files
+*.jpg binary
+*.png binary
+
+# Custom diff for Markdown files
+*.md diff=markdown
