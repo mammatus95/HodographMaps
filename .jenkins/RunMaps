@@ -51,12 +51,14 @@ pipeline {
       steps {
         sh 'export PYTHONPATH=$(pwd) && echo $PYTHONPATH'
         sh 'ls -al'
+        sh 'mkdir -p ./src/images'
         sh './run_script.sh 12'
       }
     }
   }
   post {
     always {
+
       // Archive images and diff for review
       archiveArtifacts artifacts: './images/hodographmap_ICON_Nest.png, ./images/example.png, ./diff.png', allowEmptyArchive: true
     }

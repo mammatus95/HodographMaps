@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-################################
+# ---------------------------------------------------------------------------------------------------------------------
 #
-# Meteorology library
+# Meteorology Library
 #
-################################
+# ---------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
 
@@ -15,17 +15,6 @@ ZEROCNK = 273.15        # Zero Celsius in Kelvins
 GRAV = 9.80665          # Gravity
 TOL = 1e-10             # Floating Point Tolerance
 
-
-def uv2spddir(u, v):
-
-    direction = np.rad2deg(np.arctan2(-u, v))
-
-    if isinstance(direction, np.ndarray):
-        direction = np.remainder(direction + 360, 360)
-    else:
-        direction = (direction + 360) % 360
-
-    return (np.deg2rad(direction), np.sqrt(u*u + v*v))
 
 # ---------------------------------------------------------------------------------------------------------------------
 # thermodynamics
@@ -70,6 +59,23 @@ def temp_at_mixrat(w, p):
 
 # ---------------------------------------------------------------------------------------------------------------------
 # kinematics
+
+def uv2spddir(u, v):
+    direction = np.rad2deg(np.arctan2(-u, -v))
+    if isinstance(direction, np.ndarray):
+        direction = np.remainder(direction + 360, 360)
+    else:
+        direction = (direction + 360) % 360
+
+    wind_speed = np.sqrt(np.square(u) + np.square(v))
+    if type(wind_speed) is not np.ndarray:
+        if wind_speed == 0:
+            direction = np.nan
+    else:
+        direction[np.where(wind_speed == 0)] = np.nan
+
+    return (direction, wind_speed)
+
 
 def mean_wind(u, v, ps, stu=0, stv=0):
     """
