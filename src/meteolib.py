@@ -76,6 +76,17 @@ def uv2spddir(u, v):
 
     return (direction, wind_speed)
 
+def uv2spddir_rad(u, v):
+    direction = np.arctan2(u, -v)
+
+    wind_speed = np.sqrt(np.square(u) + np.square(v))
+    if type(wind_speed) is not np.ndarray:
+        if wind_speed == 0:
+            direction = np.nan
+    else:
+        direction[np.where(wind_speed == 0)] = np.nan
+
+    return (direction, wind_speed)
 
 def mean_wind(u, v, ps, stu=0, stv=0):
     """

@@ -41,6 +41,10 @@ store_path=$(pwd)/modeldata
 
 # rm log
 rm ./log.txt > /dev/null 2>&1
+echo "Configurations:" > log.txt
+echo "Model run: ${R}z" >> log.txt
+echo "Leadtime: ${FP}z" >> log.txt
+echo "Today Date: " $(date +"%d.%m.%Y") >> log.txt
 
 # create nwp directory and if not there a output images directory
 mkdir -p ${store_path}
@@ -107,13 +111,13 @@ echo default_date: \"$(date +%Y-%m-%d)\" >> run.yml
 echo "Plot Hodograph Maps"
 # run python script
 #which python3
-python3 main.py ICON >> log.txt 2>&1
-python3 main.py IFS >> log.txt 2>&1
-python3 main.py GFS >> log.txt 2>&1
+python3 main.py ICON #>> log.txt 2>&1
+python3 main.py IFS #>> log.txt 2>&1
+python3 main.py GFS #>> log.txt 2>&1
 
-rm run.yml
+#rm run.yml
 # remove nwp files
-rm -r ${store_path}
+#rm -r ${store_path}
 
 echo "done with leadtime ${T}h on $(date)"
 cd ..

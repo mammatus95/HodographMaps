@@ -1,4 +1,4 @@
-debugflag : False
+debugflag : False # False True
 
 program_mode : Basic # Test Basic
 

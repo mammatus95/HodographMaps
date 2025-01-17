@@ -39,7 +39,7 @@ latmax = 90
 d_grad = 0.25
 """
 # ---------------------------------------------------------------------------------------------------------------------
-#             name    typeOfLevel    level
+#            shortName  typeOfLevel    level
 par_list_gfs = [
                ('u', 'isobaricInhPa', 1000),
                ('u', 'isobaricInhPa',  975),
@@ -94,7 +94,7 @@ par_list_ifs = [
                ('v', 'isobaricInhPa',  500),
                ('v', 'isobaricInhPa',  400),
                ('v', 'isobaricInhPa',  300),
-               ('cape', 'entireAtmosphere', 0),
+               ('mucape', 'mostUnstableParcel', 0),
                # ('10u',  'heightAboveGround', 10),
                # ('10v', 'heightAboveGround',  10),
                # ('100u', 'heightAboveGround', 100),
@@ -224,12 +224,21 @@ class MODELINFO:
         # modelname_RRz_YYYYMMDD_f015.grib2
         gribidx = pygrib.index(f"{path}{self.getname().lower()}_{run:02d}z_{date_string}_f{fp:03d}.grib2",
                                'shortName', 'typeOfLevel', 'level')
+
+        #print(gribidx)
+        # Print all keys in the index
+        #print(f"Available keys in the index: {gribidx.keys} {type(gribidx)}")
+        #print("Short Names:", gribidx['shortName'])
+        #print("Type of Levels:", gribidx.keys('typeOfLevel'))
+        #print("Levels:", gribidx.keys('level'))
+
         # grbs.seek(0)
+
 
         for par in self.getParamter():
             try:
                 grb_message = gribidx.select(shortName=par[0], typeOfLevel=par[1], level=par[2])[0]
-                if par[0] == "cape":
+                if par[0] == "cape" or par[0] == "mucape":
                     cape_fld = grb_message.values
                     lats, lons = grb_message.latlons()
                 else:

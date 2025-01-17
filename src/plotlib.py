@@ -59,7 +59,7 @@ def eu_states(hour, start, datetime_obj, model_name, projection=crs.EuroPP()):
     return fig, ax
 
 
-def ce_states(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=1.56, lon2=18.5, lat1=45.1, lat2=56.6):
+def ce_states(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=1.56, lon2=18.5, lat1=45.2, lat2=56.4):
     fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
     plt.subplots_adjust(left=0.05, right=0.99, bottom=0.05, top=0.95)
     ax.set_extent([lon1, lon2, lat1, lat2])
@@ -185,7 +185,8 @@ def hodopoint(point, u, v, pres_levels, ax, width=0.1, clim=50, proj='polar', sm
     ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+10, '-k', alpha=.3, lw=0.8)
     # ax2.plot(np.linspace(0, 2*np.pi, 100), np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
 
-    wdir, spd = met.uv2spddir(u, v)
+    wdir, spd = met.uv2spddir_rad(u, v)
+    wdir -= np.pi
 
     # smoothing
     if smooth is True:
@@ -196,7 +197,7 @@ def hodopoint(point, u, v, pres_levels, ax, width=0.1, clim=50, proj='polar', sm
     if np.max(spd[4:]) > 28:
         u_mean = np.mean(u[np.where(spd > 27)])
         v_mean = np.mean(v[np.where(spd > 27)])
-        wdir_mean = met.uv2spddir(u_mean, v_mean)[0]
+        wdir_mean = met.uv2spddir_rad(u_mean, v_mean)[0] - np.pi
         ax2.plot(np.linspace(wdir_mean-np.pi/8,
                              wdir_mean+np.pi/8, 100),
                  np.zeros(100)+30, '-k', alpha=.3, lw=0.8)
@@ -211,7 +212,7 @@ def hodopoint(point, u, v, pres_levels, ax, width=0.1, clim=50, proj='polar', sm
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt="png"):
+def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt="png", parcel="ML"):
     """
     Parameters:
     ------------
@@ -226,7 +227,7 @@ def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt
     --------
     None
     """
-
+    threshold=-1
     pres_levels = model_obj.getlevels()
     model_name = model_obj.getname()
     start = model_obj.getrun()
@@ -247,7 +248,7 @@ def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt
     cax = fig.add_axes([0.44, 0.03, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    ax.annotate("CAPE ML(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
+    ax.annotate(f"CAPE {parcel}(contour plot)", xy=(0.8, -0.07), xycoords='axes fraction', fontsize=14)
     ax.annotate(r'in $J/kg$', xy=(0.8, -0.1), xycoords='axes fraction', fontsize=14)
 
     ax.annotate('1000-850 hPa in magenta', xy=(0.02, -0.03), xycoords='axes fraction', fontsize=13)

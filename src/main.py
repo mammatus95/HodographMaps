@@ -19,13 +19,21 @@ def run_plots(model_obj, fp):
     config = ut.load_yaml('config.yml')
     debug_flag = config['debugflag']
 
-    if model_obj.getname() == "IFS" or model_obj.getname() == "GFS":
+    if model_obj.getname() == "IFS":
         cape_fld, u_fld, v_fld, lats, lons = model_obj.open_gribfile_preslvl(fp, path="./modeldata/")
 
         if debug_flag is True:
             print(f"u_mean by lvl: {np.nanmean(u_fld, axis=(1, 2))}")
         plotlib.basic_plot(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
-                           threshold=config["threshold"])
+                           threshold=config["threshold"], parcel="MU")
+    elif model_obj.getname() == "GFS":
+        cape_fld, u_fld, v_fld, lats, lons = model_obj.open_gribfile_preslvl(fp, path="./modeldata/")
+
+        if debug_flag is True:
+            print(f"u_mean by lvl: {np.nanmean(u_fld, axis=(1, 2))}")
+        plotlib.basic_plot(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
+                           threshold=config["threshold"]) 
+
     else:
         # program_mode
         program_mode = config["program_mode"]
