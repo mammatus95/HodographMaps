@@ -61,6 +61,19 @@ def temp_at_mixrat(w, p):
 # kinematics
 
 def uv2spddir(u, v):
+    """
+    Compute wind direction and speed from u and v components.
+
+    Parameters
+    ----------
+    u, v : array_like
+        zonal and meridional wind components
+
+    Returns
+    -------
+    direction, speed : tuple of array_like
+        direction in degrees and wind speed in m/s
+    """
     direction = np.rad2deg(np.arctan2(-u, -v))
     if isinstance(direction, np.ndarray):
         direction = np.remainder(direction + 360, 360)
@@ -76,7 +89,21 @@ def uv2spddir(u, v):
 
     return (direction, wind_speed)
 
+
 def uv2spddir_rad(u, v):
+    """
+    Compute wind direction and speed from u and v components.
+
+    Parameters
+    ----------
+    u, v : array_like
+        zonal and meridional wind components
+
+    Returns
+    -------
+    direction, speed : tuple of array_like
+        direction in radians and wind speed in m/s
+    """
     direction = np.arctan2(u, -v)
 
     wind_speed = np.sqrt(np.square(u) + np.square(v))
@@ -87,6 +114,7 @@ def uv2spddir_rad(u, v):
         direction[np.where(wind_speed == 0)] = np.nan
 
     return (direction, wind_speed)
+
 
 def mean_wind(u, v, ps, stu=0, stv=0):
     """

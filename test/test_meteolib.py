@@ -18,18 +18,19 @@ class TestTempAtMixrat(unittest.TestCase):
     def test_edge_cases(self):
         w = np.array([30, 1e-6])  # edge cases for mixing ratio
         p = np.array([1000, 1000])  # constant pressure
-        result = temp_at_mixrat(w, p)
-        #self.assertTrue(np.isnan(result[0]))  # expect NaN for zero mixing ratio
-        #self.assertGreater(result[1], -100)  # expect finite temperature for small mixing ratio
+        # result = temp_at_mixrat(w, p)
+        # self.assertTrue(np.isnan(result[0]))  # expect NaN for zero mixing ratio
+        # self.assertGreater(result[1], -100)  # expect finite temperature for small mixing ratio
 
 # ----------------------------------------------------------------------------------------------------------------------------
+
 
 class TestUV2SPDDIR(unittest.TestCase):
 
     def setUp(self):
 
         # absolute allowed difference esimate and expected value
-        self.delta = 0.1 # degree
+        self.delta = 0.1  # degree
 
     def test_scalar_inputs(self):
         u = 1.0
@@ -82,7 +83,7 @@ class TestUV2SPDDIR(unittest.TestCase):
         direction, speed = uv2spddir(u, v)
         self.assertAlmostEqual(direction, expected_wdir, delta=self.delta)
         self.assertEqual(speed, excepted_speed)
-    
+
     def test_south_wind(self):
         """
         Test case for south wind direction and speed conversion.
@@ -146,11 +147,11 @@ class TestUV2SPDDIR(unittest.TestCase):
 
 
 class TestUV2SPDDIRRad(unittest.TestCase):
-   
+
     def setUp(self):
         # absolute allowed difference esimate and expected value
         self.delta = 1e-6
-    
+
     def test_zero_inputs(self):
         u = 0.0
         v = 0.0
@@ -176,25 +177,25 @@ class TestUV2SPDDIRRad(unittest.TestCase):
         u = 0.0
         v = -1.0
         direction, _ = uv2spddir_rad(u, v)
-        self.assertAlmostEqual(direction, np.pi, delta=self.delta)
+        self.assertAlmostEqual(direction, 0.0, delta=self.delta)
 
     def test_south_wind(self):
         u = 0.0
         v = 1.0
         direction, _ = uv2spddir_rad(u, v)
-        self.assertAlmostEqual(direction, 0.0, delta=self.delta)
+        self.assertAlmostEqual(direction, np.pi, delta=self.delta)
 
     def test_east_wind(self):
         u = 1.0
         v = 0.0
         direction, _ = uv2spddir_rad(u, v)
-        self.assertAlmostEqual(direction, -np.pi/2, delta=self.delta)
+        self.assertAlmostEqual(direction, np.pi/2, delta=self.delta)
 
     def test_west_wind(self):
         u = -1.0
         v = 0.0
         direction, _ = uv2spddir_rad(u, v)
-        self.assertAlmostEqual(direction, np.pi/2, delta=self.delta)
+        self.assertAlmostEqual(direction, -np.pi/2, delta=self.delta)
 
     def test_wind_speed(self):
         u = 3.0

@@ -4,6 +4,8 @@ from datetime import datetime
 # project modul
 from src.modelinfolib import MODELINFO
 
+# ----------------------------------------------------------------------------------------------------------------------------
+
 
 class TestMODELIFNO(unittest.TestCase):
     def setUp(self):
@@ -49,6 +51,8 @@ class TestMODELIFNO(unittest.TestCase):
 
     def test_create_plottitle(self):
         self.assertEqual(self.icon_nest.create_plottitle(), "Hodographmap of ICON Nest")
+
+# ----------------------------------------------------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':

@@ -76,3 +76,9 @@ This project is licensed under the terms of the MIT license. See the [LICENSE](L
   <img src="https://i.creativecommons.org/l/by/4.0/80x15.png" alt="creative-commons-by" style="border-width:0"></a>
 </p>
 
+## Create nwp data for testing
+```bash
+cdo -f nc4 sellonlatbox,1,19,45,57 input_file output_file
+```
+
+

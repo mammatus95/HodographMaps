@@ -8,9 +8,9 @@ import argparse
 import numpy as np
 
 # own moduls
-import utilitylib as ut
-import plotlib
-import modelinfolib as model
+import src.utilitylib as ut
+import src.plotlib as plotlib
+import src.modelinfolib as model
 
 # ---------------------------------------------------------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ def run_plots(model_obj, fp):
         if debug_flag is True:
             print(f"u_mean by lvl: {np.nanmean(u_fld, axis=(1, 2))}")
         plotlib.basic_plot(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
-                           threshold=config["threshold"]) 
+                           threshold=config["threshold"])
 
     else:
         # program_mode
@@ -43,7 +43,7 @@ def run_plots(model_obj, fp):
         if program_mode == "Test":
             cape_fld, lats, lons = model_obj.open_icon_gribfile_single(fieldname, fp, path="./modeldata/")
             assert cape_fld.shape == (model_obj.getnlat(), model_obj.getnlon()), "Shape inconsistency"
-            plotlib.test_plot(cape_fld, lats, lons, fp, model_obj.getrun(), titel='CAPE')
+            plotlib.cape_plot(cape_fld, lats, lons, fp, model_obj.getrun(), model_obj.getrundate(), titel='CAPE')
 
         elif program_mode == "Basic":
             cape_fld, lats, lons = model_obj.open_icon_gribfile_single(fieldname, fp, path="./modeldata/")
@@ -68,12 +68,11 @@ def run_plots(model_obj, fp):
                 print(f"u_mean by lvl: {np.nanmean(u_fld, axis=(1, 2))}")
             plotlib.basic_plot(model_obj, cape_fld, u_fld, v_fld, lats, lons, fp,
                                threshold=config["threshold"])
-            
+
             # Create a 2D array filled with NaNs
             lpi_fld = np.full(cape_fld.shape, np.nan)
             if config["lpi"] is True:
                 lpi_fld, _, _ = model_obj.open_icon_gribfile_single("LPI_CON_MAX", fp, path="./modeldata/")
-
 
             plotlib.basic_plot_custarea(model_obj, cape_fld, lpi_fld, u_fld, v_fld, lats, lons, fp,
                                         threshold=config["threshold"])

@@ -41,6 +41,33 @@ def load_yaml(yaml_file, yaml_path='.'):
 
 
 def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
+    """
+    Downloads ICON EU NWP data from DWD's opendata server. The filename is constructed
+    from the given parameters. The downloaded file is stored in the given path with
+    the name "test.grib2.bz2".
+
+    Parameters:
+    -----------
+    fieldname : str
+        name of the field to download (e.g. "cape_ml", "cin_ml", "t_2m")
+    datum : str
+        date of the model run in the format "YYYYMMDD"
+    run : str
+        model run identifier (e.g. "00", "12")
+    fp : int
+        forecast time (0-48)
+    store_path : str
+        path where the downloaded file will be stored
+
+    Returns:
+    -------
+    None
+
+    Notes:
+    -----
+    This function does not perform any error checking. If the file does not exist
+    on the server, this function will raise an exception.
+    """
     opendataserver = "https://opendata.dwd.de/weather/nwp/icon-eu/grib"
     nwp_name = f"icon-eu_europe_regular-lat-lon_single-level_{datum}{run}_{fp:03d}_{fieldname.upper()}.grib2.bz2"
     url_link = f"{opendataserver}/{run}/{fieldname.lower()}/{nwp_name}"
@@ -49,4 +76,4 @@ def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
     with open(f"{store_path}/test.grib2.bz2", 'wb') as f:
         f.write(response.content)
 
-    print("Download complete.")
+    print(f"Download complete. File name is {store_path}/test.grib2.bz2")

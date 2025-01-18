@@ -111,13 +111,13 @@ echo default_date: \"$(date +%Y-%m-%d)\" >> run.yml
 echo "Plot Hodograph Maps"
 # run python script
 #which python3
-python3 main.py ICON #>> log.txt 2>&1
-python3 main.py IFS #>> log.txt 2>&1
-python3 main.py GFS #>> log.txt 2>&1
+python3 main.py ICON >> log.txt 2>&1
+python3 main.py IFS >> log.txt 2>&1
+python3 main.py GFS >> log.txt 2>&1
 
-#rm run.yml
+rm run.yml
 # remove nwp files
-#rm -r ${store_path}
+rm -r ${store_path}
 
 echo "done with leadtime ${T}h on $(date)"
 cd ..

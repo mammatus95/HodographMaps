@@ -15,8 +15,8 @@ states_provinces = cfeature.NaturalEarthFeature(category='cultural', name='admin
                                                 scale='10m', facecolor='none')
 
 # own moduls
-import utilitylib as ut
-import meteolib as met
+import src.utilitylib as ut
+import src.meteolib as met
 
 # ---------------------------------------------------------------------------------------------------------------------
 # create plot class
@@ -28,36 +28,7 @@ config = ut.load_yaml('config.yml')
 fontsize = config["fontsize"]
 titlesize = config["titlesize"]
 
-
-def eu_merc(hour, start, datetime_obj, model_name, projection=crs.Mercator(), factor=3):
-    fig, ax = plt.subplots(figsize=(3*factor, 3.5091*factor), subplot_kw=dict(projection=projection))
-    ax.set_extent([-10.5, 28.0, 30.5, 67.5])
-    # ax.stock_img()
-    ax.coastlines('50m', linewidth=1.2)
-    gl = ax.gridlines(draw_labels=True)
-    gl.xlabels_top = False
-    gl.ylabels_right = False
-    gl.xformatter = LONGITUDE_FORMATTER
-    gl.yformatter = LATITUDE_FORMATTER
-    string1, string2 = ut.datum(hour, start, datetime_obj)
-    plt.annotate(model_name, xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
-    plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
-    plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
-    return fig, ax
-
-
-def eu_states(hour, start, datetime_obj, model_name, projection=crs.EuroPP()):
-    fig, ax = plt.subplots(figsize=(9, 7), subplot_kw=dict(projection=projection))
-    plt.subplots_adjust(left=0.05, right=0.97, bottom=0.05, top=0.95)
-    ax.set_extent([-9.5, 33.0, 38.5, 58.5])
-    ax.coastlines('50m', linewidth=1.2)
-    ax.add_feature(states_provinces, edgecolor='black')
-    string1, string2 = ut.datum(hour, start, datetime_obj)
-    plt.annotate(model_name, xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
-    plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
-    plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
-    return fig, ax
-
+# ---------------------------------------------------------------------------------------------------------------------
 
 def ce_states(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=1.56, lon2=18.5, lat1=45.2, lat2=56.4):
     fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
@@ -83,31 +54,6 @@ def customize_area(hour, start, datetime_obj, model_name, projection=crs.EuroPP(
     return fig, ax
 
 
-def alps(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=5.8, lon2=17.8, lat1=45.23, lat2=49.5):
-    fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
-    ax.set_extent([lon1, lon2, lat1, lat2])
-    ax.coastlines('10m', linewidth=1.2)
-    ax.add_feature(states_provinces, edgecolor='black')
-    string1, string2 = ut.datum(hour, start, datetime_obj)
-    plt.annotate("ICON Nest (DWD)", xy=(0.7, -0.04), xycoords='axes fraction', fontsize=10)
-    plt.annotate(string1, xy=(0.82, 1.01), xycoords='axes fraction', fontsize=fontsize)
-    plt.annotate(string2, xy=(0, 1.01), xycoords='axes fraction', fontsize=fontsize)
-    return fig, ax
-
-
-def two_plots(projection=crs.EuroPP(), lon1=3.56, lon2=16.5, lat1=46.2, lat2=55.6, fac=3):
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(5*fac, 3*fac), subplot_kw=dict(projection=projection))
-    fig.subplots_adjust(left=0.02, right=0.92, top=0.95, bottom=0.05, wspace=0.14)
-    ax1.set_extent([lon1, lon2, lat1, lat2])
-    ax1.coastlines('10m', linewidth=1.2)
-    ax1.add_feature(states_provinces, edgecolor='black')
-    ax2.set_extent([lon1, lon2, lat1, lat2])
-    ax2.coastlines('10m', linewidth=1.2)
-    ax2.add_feature(states_provinces, edgecolor='black')
-    plt.annotate("ICON Nest (DWD)", xy=(0.6, -0.03), xycoords='axes fraction', fontsize=fontsize)
-    return fig, ax1, ax2
-
-
 # ---------------------------------------------------------------------------------------------------------------------
 # create colormap for CAPE field
 clevs = np.array([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
@@ -117,8 +63,29 @@ cmap = LinearSegmentedColormap.from_list("", ["yellowgreen", "gold", "orange", "
 cmap = ListedColormap(cmap(np.linspace(0, 1, 256))[4:240])
 # ---------------------------------------------------------------------------------------------------------------------
 
+def test_plot(hour, run, model_obj, titel='TEST'):
+    """
+    Parameters:
+    ------------
+    hour       :
+    run        :
 
-def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
+    Returns:
+    --------
+    None
+    """
+
+    _, _ = ce_states(hour, run, model_obj.getrundate(), projection=crs.PlateCarree())
+    plt.title(titel, fontsize=titlesize)
+
+    name = f"test_ce_{hour}.png"
+    plt.savefig(name)
+    plt.close()
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+def cape_plot(cape_fld, lats, lons, hour, run, rundate, titel='CAPE'):
     """
     Parameters:
     ------------
@@ -133,7 +100,7 @@ def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
     None
     """
 
-    fig, ax = ce_states(hour, run, projection=crs.PlateCarree())
+    fig, ax = ce_states(hour, run, rundate, projection=crs.PlateCarree())
     plt.title(titel, fontsize=titlesize)
 
     wx = ax.contourf(lons, lats, cape_fld[:, :], levels=clevs, transform=crs.PlateCarree(),
@@ -142,7 +109,7 @@ def test_plot(cape_fld, lats, lons, hour, run, titel='CAPE'):
     cax = fig.add_axes([0.27, 0.05, 0.35, 0.05])
     fig.colorbar(wx, cax=cax, orientation='horizontal')
 
-    name = f"test_ce_{hour}.png"
+    name = f"testcape_ce_{hour}.png"
     plt.savefig(name)
     plt.close()
 
@@ -227,7 +194,7 @@ def basic_plot(model_obj, cape_fld, u, v, lats, lons, hour, threshold=10., imfmt
     --------
     None
     """
-    threshold=-1
+    threshold = -1
     pres_levels = model_obj.getlevels()
     model_name = model_obj.getname()
     start = model_obj.getrun()
