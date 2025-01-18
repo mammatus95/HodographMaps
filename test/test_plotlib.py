@@ -4,6 +4,7 @@ import unittest
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from matplotlib.testing.compare import compare_images
 from datetime import datetime
 from cartopy.crs import EuroPP, PlateCarree
 import src.utilitylib as ut
@@ -94,8 +95,8 @@ class TestTestPlot(unittest.TestCase):
 
         test_plot(12, self.model_obj.getrun(), self.model_obj)
 
-        self.ref_path="./ref/test_ce_12.png"
-        self.test_img="./test_ce_12.png"
+        self.ref_path = "./ref/test_ce_12.png"
+        self.test_img = "./test_ce_12.png"
 
     def test_plot_exist(self):
         self.assertTrue(os.path.exists(self.test_img))
@@ -116,7 +117,9 @@ class TestTestPlot(unittest.TestCase):
         with self.assertRaises(AttributeError):
             test_plot(12, self.model_obj.getrun(), 123)
 
-
+    def test_compare_images(self):
+        if compare_images(self.ref_path, self.test_img, 0.001) is not None:
+            self.fail(f"Images are different: RMS: {compare_images(self.ref_path, self.test_img, 0.001)}")
 
 # ---------------------------------------------------------------------------------------------------------------------
 

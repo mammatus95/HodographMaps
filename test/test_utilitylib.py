@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import unittest
-import yaml
 import os
 from tempfile import TemporaryDirectory
 from datetime import date
@@ -107,10 +106,13 @@ class TestDownloadNWP(unittest.TestCase):
         datum = today.strftime("%Y%m%d")
         run = "00"
         fp = 0
-        download_nwp('cape_ml', datum=datum, run=run, fp=fp, store_path=store_path)
+        fieldname="cin_ml"
+        grb_name = f"icon-eu_europe_regular-lat-lon_single-level_{datum}{run}_{fp:03d}_{fieldname.upper()}.grib2"
+        download_nwp(fieldname, datum=datum, run=run, fp=fp, store_path=store_path)
 
         # check if file exist
-        self.assertTrue(os.path.exists(f"{store_path}/test.grib2.bz2"))
+        self.assertTrue(os.path.exists(f"{store_path}/{fieldname}.grib2.bz2"))
+        self.assertTrue(os.path.exists(f"{store_path}/{grb_name}"))
         # self.assertTrue(os.path.exists(f"{store_path}/icon-eu_europe_regular-lat-lon_single-level_{datum}{run}_{fp:03d}_CAPE_ML.grib2.bz2"))
 
 # ----------------------------------------------------------------------------------------------------------------------------

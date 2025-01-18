@@ -13,6 +13,9 @@
 **.log
 **.pyc
 
+**.grib2
+**.bz2
+
 
 src/modeldata
 src/run.yml
