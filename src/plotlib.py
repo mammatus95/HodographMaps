@@ -42,7 +42,7 @@ def ce_states(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=1.56, lon
     return fig, ax
 
 
-def customize_area(hour, start, datetime_obj, model_name, projection=crs.EuroPP(), lon1=10.7, lon2=18, lat1=49.8, lat2=54.8):
+def customize_area(hour, start, datetime_obj, projection=crs.EuroPP(), lon1=10.7, lon2=18, lat1=49.8, lat2=54.8):
     fig, ax = plt.subplots(figsize=(11, 9), subplot_kw=dict(projection=projection))
     plt.subplots_adjust(left=0.05, right=0.99, bottom=0.1, top=0.95)
     ax.set_extent([lon1, lon2, lat1, lat2])
