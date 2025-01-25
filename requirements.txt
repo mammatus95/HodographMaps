@@ -1,6 +1,6 @@
 numpy
-matplotlib
-cartopy
+matplotlib==3.10.0
+cartopy==0.24.0
 requests
 pygrib
 netcdf4
