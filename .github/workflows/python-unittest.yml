@@ -38,6 +38,7 @@ jobs:
       with:
         path: |
           ./test/test_ce_12-failed-diff.png
+          ./test/test_ce_12.png
         if-no-files-found: ignore
         uploadMethod: imgbb
         apiKey: '${{ secrets.IMGBB_API_KEY }}'
