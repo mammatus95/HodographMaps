@@ -1,0 +1,56 @@
+name: Unittest
+
+on: [push, pull_request_target]
+    
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        pip3 install --upgrade pip
+        pip3 install -r requirements.txt
+    - name: Run tests with nose2
+      continue-on-error: true
+      id: unittest
+      run: |
+        cd test
+        nose2
+        ls
+    - name: Upload Result Images as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: result-image
+        path: ./test/
+    - name: Upload image
+      continue-on-error: true
+      id: upload_image
+      uses: McCzarny/upload-image@v1.3.0
+      with:
+        path: |
+          ./test/test_ce_12-failed-diff.png
+          ./test/test_ce_12.png
+        uploadMethod: imgbb
+        apiKey: '${{ secrets.IMGBB_API_KEY }}'
+    - name: 'Comment issue'
+      if: job.steps.upload_image.status != failure()
+      uses: actions/github-script@v7.0.1
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: '10',
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '**Plot diff**:\n\n![0](${{fromJson(steps.upload_image.outputs.urls)[0]}})'
+            });
+        
+        

@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 import requests
 import yaml
+import bz2
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +35,24 @@ def load_yaml(yaml_file, yaml_path='.'):
     with open(f"{yaml_path}/{yaml_file}", 'r') as yhand:
         config_data = yaml.safe_load(yhand)
     return config_data
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+def decompress_file(input_file, output_file):
+    """
+    Decompresses a bz2 compressed file.
+
+    Parameters:
+    -----------
+    input_file : str
+        Path to the bz2 compressed input file.
+    output_file : str
+        Path where the decompressed file will be saved.
+    """
+
+    with bz2.open(input_file, 'rb') as f_in:
+        with open(output_file, 'wb') as f_out:
+            f_out.write(f_in.read())
 
 # ---------------------------------------------------------------------------------------------------------------------
 # https://opendata.dwd.de/weather/nwp/icon-eu/grib/00/cape_ml/icon-eu_europe_regular-lat-lon_single-level_2024022700_006_CAPE_ML.grib2.bz2
@@ -70,10 +89,13 @@ def download_nwp(fieldname, datum="20240227", run="00", fp=0, store_path="./"):
     """
     opendataserver = "https://opendata.dwd.de/weather/nwp/icon-eu/grib"
     nwp_name = f"icon-eu_europe_regular-lat-lon_single-level_{datum}{run}_{fp:03d}_{fieldname.upper()}.grib2.bz2"
+    grb_name = f"icon-eu_europe_regular-lat-lon_single-level_{datum}{run}_{fp:03d}_{fieldname.upper()}.grib2"
     url_link = f"{opendataserver}/{run}/{fieldname.lower()}/{nwp_name}"
 
     response = requests.get(url_link)
-    with open(f"{store_path}/test.grib2.bz2", 'wb') as f:
+    with open(f"{store_path}/{fieldname}.grib2.bz2", 'wb') as f:
         f.write(response.content)
 
-    print(f"Download complete. File name is {store_path}/test.grib2.bz2")
+    decompress_file(f"{store_path}/{fieldname}.grib2.bz2", f"{store_path}/{grb_name}")
+
+    print(f"Download complete. File name is {store_path}{fieldname}.grib2.")
