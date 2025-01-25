@@ -28,14 +28,12 @@ jobs:
         ls
     - name: Upload Result Images as Artifact
       uses: actions/upload-artifact@v4
-      if: job.steps.unittest.status == failure()
       with:
         name: result-image
         path: ./test/
-        if-no-files-found: ignore
+        if-no-files-found: error
     - name: Upload image
       id: upload_image
-      if: job.steps.unittest.status == failure()
       uses: McCzarny/upload-image@v1.3.0
       with:
         path: |
@@ -44,7 +42,6 @@ jobs:
         uploadMethod: imgbb
         apiKey: '${{ secrets.IMGBB_API_KEY }}'
     - name: 'Comment issue'
-      if: job.steps.unittest.status == failure()
       uses: actions/github-script@v7.0.1
       with:
         script: |
