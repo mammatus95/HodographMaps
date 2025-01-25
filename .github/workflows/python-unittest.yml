@@ -31,18 +31,18 @@ jobs:
       with:
         name: result-image
         path: ./test/
-        if-no-files-found: error
     - name: Upload image
+      continue-on-error: true
       id: upload_image
       uses: McCzarny/upload-image@v1.3.0
       with:
         path: |
           ./test/test_ce_12-failed-diff.png
           ./test/test_ce_12.png
-        if-no-files-found: ignore
         uploadMethod: imgbb
         apiKey: '${{ secrets.IMGBB_API_KEY }}'
     - name: 'Comment issue'
+      if: job.steps.upload_image.status != failure()
       uses: actions/github-script@v7.0.1
       with:
         script: |
