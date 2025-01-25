@@ -98,6 +98,7 @@ class TestTestPlot(unittest.TestCase):
         self.ref_path = "./ref/test_ce_12.png"
         self.test_img = "./test_ce_12.png"
 
+
     def test_plot_exist(self):
         self.assertTrue(os.path.exists(self.test_img))
 
@@ -119,7 +120,9 @@ class TestTestPlot(unittest.TestCase):
 
     def test_compare_images(self):
         if compare_images(self.ref_path, self.test_img, 0.001) is not None:
+            # create diff image
             self.fail(f"Images are different: RMS: {compare_images(self.ref_path, self.test_img, 0.001)}")
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 
